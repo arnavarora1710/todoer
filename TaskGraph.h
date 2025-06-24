@@ -1,5 +1,5 @@
-#ifndef GRAPH_H
-#define GRAPH_H
+#ifndef TASK_GRAPH_H
+#define TASK_GRAPH_H
 
 #include "Task.h"
 #include <unordered_map>
