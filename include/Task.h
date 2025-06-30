@@ -19,7 +19,7 @@ private:
     const std::unique_ptr<Ops> m_operation{};
 
 public:
-    explicit Task(std::size_t id, std::unique_ptr<Ops> operation) : m_id{id}, m_operation{std::move(operation)} {}
+    explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation) : m_id{id}, m_operation{std::move(operation)} {}
 
     std::size_t getId() const { return m_id; }
 
