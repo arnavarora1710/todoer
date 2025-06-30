@@ -1,6 +1,6 @@
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#pragma once
 
+#include "Task.h"
 #include "TaskGraph.h"
 
 class Interpreter
@@ -16,5 +16,3 @@ private:
 public:
     Interpreter(TaskGraph *taskGraph);
 };
-
-#endif

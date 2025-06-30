@@ -1,4 +1,4 @@
-#include "../include/TaskGraph.h"
+#include "TaskGraph.h"
 
 TaskGraph::TaskGraph(int numTasks) : numTasks(numTasks) {}
 

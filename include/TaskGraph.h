@@ -1,10 +1,9 @@
-#ifndef TASK_GRAPH_H
-#define TASK_GRAPH_H
+#pragma once
 
-#include "Task.h"
 #include <ostream>
 #include <unordered_map>
 #include <vector>
+#include <queue>
 
 class TaskGraph
 {
@@ -22,5 +21,3 @@ public:
     std::vector<int> topologicalSort();
     void printTopologicalSort(std::ostream &os);
 };
-
-#endif
