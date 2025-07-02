@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include "Ops.h"
+#include "Ops.hpp"
 
 // this structure should store task metadata as well as
 // a pointer to the operation that the task will execute

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Task.h"
-#include "TaskGraph.h"
+#include "Task.hpp"
+#include "TaskGraph.hpp"
 
 class Interpreter
 {
