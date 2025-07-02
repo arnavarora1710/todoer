@@ -19,4 +19,10 @@ TEST_CASE("Testing Lexer and Parser")
 
     expr = from_string("2 + b * 5 - 3 / 5 + 5 -3");
     CHECK(expr.to_string() == "(- (+ (- (+ 2 (* b 5)) (/ 3 5)) 5) 3)");
+
+    expr = from_string("(2 + b) * 5 ");
+    CHECK(expr.to_string() == "(* (+ 2 b) 5)");
+
+    expr = from_string("(((a)))");
+    CHECK(expr.to_string() == "a");
 }

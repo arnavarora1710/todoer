@@ -19,7 +19,7 @@ struct Expression
 
     std::variant<Atom, Operation> value;
 
-    Expression() = delete;
+    Expression() = default;
     Expression(Atom atom);
     Expression(Operation operation);
 

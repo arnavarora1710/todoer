@@ -22,12 +22,16 @@ inline std::pair<float, float> bindingPower(char op)
 {
     switch (op)
     {
+    case '=':
+        return {0.0f, 0.1f};
     case '+':
     case '-':
         return {1.0f, 1.1f};
     case '*':
     case '/':
         return {2.0f, 2.1f};
+    case '^':
+        return {3.0f, 3.1f};
     default:
         throw std::runtime_error("Unknown operator: " + std::string(1, op));
     }

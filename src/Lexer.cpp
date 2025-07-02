@@ -39,9 +39,20 @@ std::optional<Token> Lexer::peek() noexcept
 Expression Lexer::parseExpression(float min_binding_power)
 {
     auto token = next();
-    if (token->type == Token::Type::Atom)
+    if (token->type == Token::Type::Atom ||
+        (token->type == Token::Type::Op && token->value == '('))
     {
-        Expression lhs(Expression::Atom{token->value});
+        Expression lhs;
+        if (token->type == Token::Type::Op && token->value == '(')
+        {
+            lhs = parseExpression(0.0f);
+            if (next()->value != ')')
+                throw std::runtime_error("Expected ) after (");
+        }
+        else
+        {
+            lhs = Expression(Expression::Atom{token->value});
+        }
         while (true)
         {
             auto next_token = peek();
@@ -52,6 +63,9 @@ Expression Lexer::parseExpression(float min_binding_power)
             }
             else if (next_token->type == Token::Type::Op)
             {
+                if (next_token->value == ')')
+                    break;
+
                 auto [lbp, rbp] = bindingPower(next_token->value);
                 if (lbp < min_binding_power)
                     break; // the left op is of higher priority, so stop tree construction here
