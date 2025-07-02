@@ -13,23 +13,23 @@ namespace Helper
     }
 
     // Helper function to create unary operation
-    std::unique_ptr<Ops> createUnaryOp(char op, int value)
+    std::unique_ptr<Ops> createUnaryOp(const std::string &op, int value)
     {
-        switch (op)
+        switch (op[0])
         {
         case '+':
             return make_unary_ops(std::identity{}, value);
         case '-':
             return make_unary_ops(std::negate<int>{}, value);
         default:
-            throw std::runtime_error("Unknown unary operator: " + std::string(1, op));
+            throw std::runtime_error("Unknown unary operator: " + op);
         }
     }
 
     // Helper function to create binary operation
-    std::unique_ptr<Ops> createBinaryOp(char op, int value1, int value2)
+    std::unique_ptr<Ops> createBinaryOp(const std::string &op, int value1, int value2)
     {
-        switch (op)
+        switch (op[0])
         {
         case '+':
             return make_binary_ops(std::plus<int>{}, value1, value2);
@@ -40,7 +40,7 @@ namespace Helper
         case '/':
             return make_binary_ops(std::divides<int>{}, value1, value2);
         default:
-            throw std::runtime_error("Unknown binary operator: " + std::string(1, op));
+            throw std::runtime_error("Unknown binary operator: " + op);
         }
     }
 

@@ -14,7 +14,7 @@ struct Expression
 
     struct Operation
     {
-        char op;
+        std::string op;
         std::vector<Expression> operands;
     };
 

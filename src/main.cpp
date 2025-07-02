@@ -20,12 +20,15 @@ int main()
         while (!tg.m_leaves.empty())
         {
             auto &leaf = tg.m_leaves.front();
-            std::cout << "before: " << expr.to_string() << std::endl;
-            std::cout << std::any_cast<int>(leaf.execute()) << std::endl;
-            std::cout << "after: " << expr.to_string() << std::endl;
+            auto result = leaf.execute();
             tg.m_leaves.clear();
             auto leaves = getLeaves(expr);
             tg.m_leaves = std::move(leaves);
+            if (tg.m_leaves.empty())
+            {
+                std::cout << std::any_cast<int>(result) << std::endl;
+                break;
+            }
         }
     }
 

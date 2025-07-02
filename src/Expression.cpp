@@ -15,7 +15,7 @@ std::string Expression::to_string() const
     {
         const auto &op = std::get<Operation>(value);
         result.push_back('(');
-        result.push_back(op.op);
+        result += op.op;
         for (const auto &arg : op.operands)
         {
             result.push_back(' ');

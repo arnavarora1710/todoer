@@ -6,14 +6,26 @@
 
 Lexer::Lexer(std::string_view input)
 {
-    for (const auto &token : input)
+    for (auto token_iter = input.begin(); token_iter != input.end();)
     {
+        const auto token = *token_iter;
         if (token == ' ' || token == '\n')
-            continue;
+        {
+        }
         else if (std::isdigit(token) || std::isalpha(token))
-            tokens.emplace_back(Token::Type::Atom, token);
+        {
+            std::string atom;
+            while (token_iter != input.end() && (std::isdigit(*token_iter) || std::isalpha(*token_iter)))
+            {
+                atom += token;
+                ++token_iter;
+            }
+            tokens.emplace_back(Token::Type::Atom, atom);
+            continue;
+        }
         else
-            tokens.emplace_back(Token::Type::Op, token);
+            tokens.emplace_back(Token::Type::Op, std::string(1, token));
+        ++token_iter;
     }
     std::reverse(tokens.begin(), tokens.end());
 }
@@ -40,15 +52,15 @@ Expression Lexer::parseExpression(int min_binding_power)
 {
     auto token = next();
     if (token->type == Token::Type::Atom ||
-        (token->type == Token::Type::Op && (token->value == '(' || token->value == '+' || token->value == '-')))
+        (token->type == Token::Type::Op && (token->value == "(" || token->value == "+" || token->value == "-")))
     {
         Expression lhs;
         if (token->type == Token::Type::Op)
         {
-            if (token->value == '(')
+            if (token->value == "(")
             {
                 lhs = parseExpression(0);
-                if (next()->value != ')')
+                if (next()->value != ")")
                     throw std::runtime_error("Expected ) after (");
             }
             else
@@ -61,7 +73,7 @@ Expression Lexer::parseExpression(int min_binding_power)
         }
         else
         {
-            lhs = Expression(Expression::Atom{std::string(1, token->value)});
+            lhs = Expression(Expression::Atom{token->value});
         }
         while (true)
         {
@@ -73,7 +85,7 @@ Expression Lexer::parseExpression(int min_binding_power)
             }
             else if (next_token->type == Token::Type::Op)
             {
-                if (next_token->value == ')')
+                if (next_token->value == ")")
                     break;
 
                 auto [lbp, rbp] = infixBindingPower(next_token->value);
@@ -86,7 +98,7 @@ Expression Lexer::parseExpression(int min_binding_power)
             }
             else
             {
-                throw std::runtime_error("Unexpected Atom: " + std::string(1, next_token->value));
+                throw std::runtime_error("Unexpected Atom: " + next_token->value);
             }
         }
         return lhs;

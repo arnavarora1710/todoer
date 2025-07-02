@@ -14,28 +14,30 @@ struct Token
     };
 
     Type type;
-    char value;
+    std::string value;
 
     Token() = delete;
-    Token(Type type, char value) : type(type), value(value) {}
+    Token(Type type, std::string value) : type(type), value(value) {}
 };
 
-inline std::pair<std::monostate, int> prefixBindingPower(char op)
+inline std::pair<std::monostate, int> prefixBindingPower(const std::string &op)
 {
-    switch (op)
+    assert(op.size() == 1);
+    switch (op[0])
     {
     case '+':
     case '-':
         // can only bind to the right
         return {std::monostate{}, 9};
     default:
-        throw std::runtime_error("Unknown operator: " + std::string(1, op));
+        throw std::runtime_error("Unknown operator: " + op);
     }
 }
 
-inline std::pair<int, int> infixBindingPower(char op)
+inline std::pair<int, int> infixBindingPower(const std::string &op)
 {
-    switch (op)
+    assert(op.size() == 1);
+    switch (op[0])
     {
     case '=':
         return {1, 2};
@@ -48,6 +50,6 @@ inline std::pair<int, int> infixBindingPower(char op)
     case '^':
         return {7, 8};
     default:
-        throw std::runtime_error("Unknown operator: " + std::string(1, op));
+        throw std::runtime_error("Unknown operator: " + op);
     }
 }
