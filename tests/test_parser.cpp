@@ -25,4 +25,10 @@ TEST_CASE("Testing Lexer and Parser")
 
     expr = from_string("(((a)))");
     CHECK(expr.to_string() == "a");
+
+    expr = from_string("+ 1");
+    CHECK(expr.to_string() == "(+ 1)");
+
+    expr = from_string("--1 * 2");
+    CHECK(expr.to_string() == "(* (- (- 1)) 2)");
 }

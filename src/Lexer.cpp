@@ -3,7 +3,6 @@
 #include <cctype>
 #include <stdexcept>
 #include <algorithm>
-#include <limits>
 
 Lexer::Lexer(std::string_view input)
 {
@@ -36,18 +35,29 @@ std::optional<Token> Lexer::peek() noexcept
     return tokens.back();
 }
 
-Expression Lexer::parseExpression(float min_binding_power)
+// TODO: need to find a way to identify leaves of the tree in this function
+Expression Lexer::parseExpression(int min_binding_power)
 {
     auto token = next();
     if (token->type == Token::Type::Atom ||
-        (token->type == Token::Type::Op && token->value == '('))
+        (token->type == Token::Type::Op && (token->value == '(' || token->value == '+' || token->value == '-')))
     {
         Expression lhs;
-        if (token->type == Token::Type::Op && token->value == '(')
+        if (token->type == Token::Type::Op)
         {
-            lhs = parseExpression(0.0f);
-            if (next()->value != ')')
-                throw std::runtime_error("Expected ) after (");
+            if (token->value == '(')
+            {
+                lhs = parseExpression(0);
+                if (next()->value != ')')
+                    throw std::runtime_error("Expected ) after (");
+            }
+            else
+            {
+                // has to be a prefix op (unary + or -)
+                auto [_, rbp] = prefixBindingPower(token->value);
+                auto rhs = parseExpression(rbp);
+                lhs = Expression(Expression::Operation{token->value, {rhs}});
+            }
         }
         else
         {
@@ -66,7 +76,7 @@ Expression Lexer::parseExpression(float min_binding_power)
                 if (next_token->value == ')')
                     break;
 
-                auto [lbp, rbp] = bindingPower(next_token->value);
+                auto [lbp, rbp] = infixBindingPower(next_token->value);
                 if (lbp < min_binding_power)
                     break; // the left op is of higher priority, so stop tree construction here
                 else

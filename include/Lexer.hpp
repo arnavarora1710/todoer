@@ -18,7 +18,7 @@ public:
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
-    Expression parseExpression(float min_binding_power = -std::numeric_limits<float>::infinity());
+    Expression parseExpression(int min_binding_power = 0);
 };
 
 Expression from_string(std::string_view input);
