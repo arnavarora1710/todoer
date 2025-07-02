@@ -1,4 +1,5 @@
 #include "Expression.hpp"
+#include <iostream>
 
 Expression::Expression(Atom atom) : value(atom) {}
 Expression::Expression(Operation operation) : value(operation) {}
@@ -8,7 +9,7 @@ std::string Expression::to_string() const
     std::string result;
     if (std::holds_alternative<Atom>(value))
     {
-        result.push_back(std::get<Atom>(value).value);
+        result += (std::get<Atom>(value).value);
     }
     else
     {

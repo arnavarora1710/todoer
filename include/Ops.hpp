@@ -12,7 +12,33 @@ class Ops
 public:
     virtual ~Ops() = default;
     virtual std::any execute() const = 0;
+    virtual std::string to_string() const = 0;
 };
+
+// need a no-op operation for an expression like just a number (5)
+class NoOps : public Ops
+{
+private:
+    const std::any arg;
+
+public:
+    NoOps(std::any arg) : arg(arg) {}
+
+    std::any execute() const override
+    {
+        return arg;
+    }
+
+    std::string to_string() const override
+    {
+        return "NoOps " + std::to_string(std::any_cast<int>(arg));
+    }
+};
+
+inline auto make_no_ops(std::any arg)
+{
+    return std::make_unique<NoOps>(arg);
+}
 
 template <typename T, typename UnaryFunc>
 concept UnaryFuncInvocable = std::is_invocable_v<UnaryFunc, T>;
@@ -41,11 +67,16 @@ public:
     {
         return m_func(arg);
     }
+
+    std::string to_string() const override
+    {
+        return "UnaryOps " + std::to_string(std::any_cast<int>(arg));
+    }
 };
 
 // Factory function to create unique_ptr with deduction
 template <typename UnaryFunc, typename T>
-auto make_unary_ops(const UnaryFunc &func, const T &arg)
+inline auto make_unary_ops(const UnaryFunc &func, const T &arg)
 {
     return std::make_unique<UnaryOps<T, UnaryFunc>>(func, arg);
 }
@@ -86,6 +117,11 @@ public:
     {
         return m_func(arg1, arg2);
     }
+
+    std::string to_string() const override
+    {
+        return "BinaryOps " + std::to_string(std::any_cast<int>(arg1)) + " " + std::to_string(std::any_cast<int>(arg2));
+    }
 };
 
 // deduction guide for BinaryOps
@@ -94,7 +130,7 @@ BinaryOps(BinaryFunc func, T argument1, U argument2) -> BinaryOps<T, U, BinaryFu
 
 // Factory function to create unique_ptr with deduction
 template <typename BinaryFunc, typename T, typename U>
-auto make_binary_ops(const BinaryFunc &func, const T &arg1, const U &arg2)
+inline auto make_binary_ops(const BinaryFunc &func, const T &arg1, const U &arg2)
 {
     return std::make_unique<BinaryOps<T, U, BinaryFunc>>(func, arg1, arg2);
 }

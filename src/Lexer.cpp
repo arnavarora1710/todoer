@@ -61,7 +61,7 @@ Expression Lexer::parseExpression(int min_binding_power)
         }
         else
         {
-            lhs = Expression(Expression::Atom{token->value});
+            lhs = Expression(Expression::Atom{std::string(1, token->value)});
         }
         while (true)
         {

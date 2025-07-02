@@ -1,117 +1,123 @@
 #include "TaskGraph.hpp"
+#include "Ops.hpp"
+#include <iostream>
+#include <cassert>
+#include <algorithm>
 
-TaskGraph::TaskGraph(int numTasks) : numTasks(numTasks) {}
-
-bool TaskGraph::taskIdExists(int taskId)
+namespace Helper
 {
-    return graph.count(taskId);
+    // Helper function to extract integer value from atom
+    int extractAtomValue(const Expression::Atom &atom)
+    {
+        return std::stoi(atom.value);
+    }
+
+    // Helper function to create unary operation
+    std::unique_ptr<Ops> createUnaryOp(char op, int value)
+    {
+        switch (op)
+        {
+        case '+':
+            return make_unary_ops(std::identity{}, value);
+        case '-':
+            return make_unary_ops(std::negate<int>{}, value);
+        default:
+            throw std::runtime_error("Unknown unary operator: " + std::string(1, op));
+        }
+    }
+
+    // Helper function to create binary operation
+    std::unique_ptr<Ops> createBinaryOp(char op, int value1, int value2)
+    {
+        switch (op)
+        {
+        case '+':
+            return make_binary_ops(std::plus<int>{}, value1, value2);
+        case '-':
+            return make_binary_ops(std::minus<int>{}, value1, value2);
+        case '*':
+            return make_binary_ops(std::multiplies<int>{}, value1, value2);
+        case '/':
+            return make_binary_ops(std::divides<int>{}, value1, value2);
+        default:
+            throw std::runtime_error("Unknown binary operator: " + std::string(1, op));
+        }
+    }
+
+    // Helper function to append leaves from one deque to another
+    void appendLeaves(std::deque<Task> &target, std::deque<Task> &&source)
+    {
+        target.insert(target.end(),
+                      std::make_move_iterator(source.begin()),
+                      std::make_move_iterator(source.end()));
+    }
 }
 
-void TaskGraph::addTask(int taskId)
+std::deque<Task> getLeaves(const Expression &expr)
 {
-    if (taskIdExists(taskId))
+    std::deque<Task> leaves;
+
+    if (expr.isAtom())
     {
-        throw std::invalid_argument("Task already in map!");
+        // No task required - this will only happen if the expression is a single atom
+        return leaves;
+    }
+
+    // Handle operation expression
+    const auto &op = std::get<Expression::Operation>(expr.value);
+    const std::size_t num_operands = op.operands.size();
+    assert(num_operands > 0 && num_operands <= 2);
+
+    if (num_operands == 1)
+    {
+        // Unary operation
+        const auto &operand = op.operands[0];
+        if (operand.isAtom())
+        {
+            int value = Helper::extractAtomValue(std::get<Expression::Atom>(operand.value));
+            auto taskOp = Helper::createUnaryOp(op.op, value);
+            Task task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(&expr));
+            leaves.push_back(std::move(task));
+        }
+        else
+        {
+            // Recursively get leaves from operand
+            Helper::appendLeaves(leaves, getLeaves(const_cast<const Expression &>(operand)));
+        }
     }
     else
     {
-        graph[taskId] = {};
-        numTasks++;
-    }
-}
+        // Binary operation
+        const auto &operand1 = op.operands[0];
+        const auto &operand2 = op.operands[1];
 
-void TaskGraph::addDependency(int taskId, int dependentTaskId)
-{
-    if (!taskIdExists(taskId) and !taskIdExists(dependentTaskId))
-    {
-        throw std::invalid_argument("Both tasks not in map!");
-    }
-    else if (!taskIdExists(taskId))
-    {
-        throw std::invalid_argument("Task not in map!");
-    }
-    else if (!taskIdExists(dependentTaskId))
-    {
-        throw std::invalid_argument("Dependent task not in map!");
-    }
-    else
-    {
-        graph[taskId].push_back(dependentTaskId);
-    }
-}
-
-void TaskGraph::printGraph(std::ostream &os)
-{
-    for (auto &[taskId, dependencies] : graph)
-    {
-        os << "Task " << taskId << " depends on:" << std::endl;
-        for (int dependency : dependencies)
+        if (operand1.isAtom() && operand2.isAtom())
         {
-            os << "Task " << dependency << std::endl;
+            // Both operands are atoms
+            int value1 = Helper::extractAtomValue(std::get<Expression::Atom>(operand1.value));
+            int value2 = Helper::extractAtomValue(std::get<Expression::Atom>(operand2.value));
+            auto taskOp = Helper::createBinaryOp(op.op, value1, value2);
+            Task task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(&expr));
+            leaves.push_back(std::move(task));
         }
-        os << std::endl;
-    }
-}
-
-std::vector<int> TaskGraph::topologicalSort()
-{
-    std::vector<int> sortedTasks{};
-    std::unordered_map<int, int> inDegree{};
-
-    for (auto &[taskId, _] : graph)
-    {
-        inDegree[taskId] = 0;
-    }
-
-    for (auto &[taskId, dependencies] : graph)
-    {
-        for (int dependency : dependencies)
+        else
         {
-            inDegree[dependency]++;
-        }
-    }
-
-    std::queue<int> q{};
-
-    for (auto &[taskId, degree] : inDegree)
-    {
-        if (degree == 0)
-        {
-            q.push(taskId);
-        }
-    }
-
-    while (!q.empty())
-    {
-        int taskId = q.front();
-        q.pop();
-        sortedTasks.push_back(taskId);
-
-        for (int dependency : graph[taskId])
-        {
-            inDegree[dependency]--;
-            if (inDegree[dependency] == 0)
+            // Handle mixed operand types
+            if (operand1.isOperation())
             {
-                q.push(dependency);
+                Helper::appendLeaves(leaves, getLeaves(const_cast<const Expression &>(operand1)));
+            }
+            if (operand2.isOperation())
+            {
+                Helper::appendLeaves(leaves, getLeaves(const_cast<const Expression &>(operand2)));
             }
         }
     }
 
-    if (sortedTasks.size() != numTasks)
-    {
-        throw std::invalid_argument("Graph has a cycle!");
-    }
-
-    return sortedTasks;
+    return leaves;
 }
 
-void TaskGraph::printTopologicalSort(std::ostream &os)
+TaskGraph::TaskGraph(Expression &expr)
 {
-    std::vector<int> sortedTasks = topologicalSort();
-    os << "Tasks in topological order:" << std::endl;
-    for (int taskId : sortedTasks)
-    {
-        os << "Task " << taskId << std::endl;
-    }
-    os << std::endl;
+    m_leaves = getLeaves(expr);
 }

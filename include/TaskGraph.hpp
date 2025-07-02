@@ -1,23 +1,27 @@
 #pragma once
 
-#include <ostream>
-#include <unordered_map>
-#include <vector>
-#include <queue>
+#include "Task.hpp"
+#include "Expression.hpp"
+#include <deque>
 
-class TaskGraph
+// Want to be able to create a TaskGraph from an Expression
+struct TaskGraph
 {
-private:
-    // map task_id to vector of task_ids that are dependent on it
-    std::unordered_map<int, std::vector<int>> graph{};
-    int numTasks{};
+    // the "leaves" would be the index of the task in the graph
+    // for example, we can safely evaluate a leaf (2, +, 3) or a leaf (2, -)
+    std::deque<Task> m_leaves{};
 
-public:
-    TaskGraph(int numTasks);
-    bool taskIdExists(int taskId);
-    void addTask(int taskId);
-    void addDependency(int taskId, int dependentTaskId);
-    void printGraph(std::ostream &os);
-    std::vector<int> topologicalSort();
-    void printTopologicalSort(std::ostream &os);
+    // only need to construct from an expression
+    TaskGraph() = default;
+    TaskGraph(Expression &expr);
+    // disable copy and move constructors / assignment operators
+    // because we don't want to copy/move the graph
+    TaskGraph(const TaskGraph &) = delete;
+    TaskGraph(TaskGraph &&) = delete;
+    TaskGraph &operator=(const TaskGraph &) = delete;
+    TaskGraph &operator=(TaskGraph &&) = delete;
+    // default destructor - just deallocate the graph and queue
+    ~TaskGraph() = default;
 };
+
+std::deque<Task> getLeaves(const Expression &expr);

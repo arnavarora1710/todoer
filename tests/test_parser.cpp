@@ -31,4 +31,7 @@ TEST_CASE("Testing Lexer and Parser")
 
     expr = from_string("--1 * 2");
     CHECK(expr.to_string() == "(* (- (- 1)) 2)");
+
+    expr = from_string("-(3 + (4 * 6))");
+    CHECK(expr.to_string() == "(- (+ 3 (* 4 6)))");
 }

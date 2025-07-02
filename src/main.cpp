@@ -1,30 +1,33 @@
 #include "Task.hpp"
+#include "TaskGraph.hpp"
+#include "Expression.hpp"
+#include "Lexer.hpp"
 #include <iostream>
 #include <any>
 #include <functional>
 
 int main()
 {
-    auto func = [](int x, int y)
+    while (true)
     {
-        return x + y;
-    };
-    // Using factory function with template deduction
-    auto op = make_binary_ops(func, 10, 20);
+        std::cout << ">>> ";
+        std::string input;
+        std::getline(std::cin, input);
+        if (input == "exit")
+            break;
+        Expression expr = from_string(input);
+        TaskGraph tg(expr);
+        while (!tg.m_leaves.empty())
+        {
+            auto &leaf = tg.m_leaves.front();
+            std::cout << "before: " << expr.to_string() << std::endl;
+            std::cout << std::any_cast<int>(leaf.execute()) << std::endl;
+            std::cout << "after: " << expr.to_string() << std::endl;
+            tg.m_leaves.clear();
+            auto leaves = getLeaves(expr);
+            tg.m_leaves = std::move(leaves);
+        }
+    }
 
-    auto u_func = [](int x)
-    {
-        return -x;
-    };
-    auto op2 = make_unary_ops(u_func, 10);
-
-    Task task(1, std::move(op)); // create a task with id 1 and the operation
-    Task task2(2, std::move(op2));
-    auto ans = task.execute(); // execute the operation
-    auto ans2 = task2.execute();
-    std::cout << "answer: " << std::any_cast<int>(ans) << std::endl;   // print the result
-    std::cout << "answer2: " << std::any_cast<int>(ans2) << std::endl; // print the result
-    std::cout << "Task executed successfully." << std::endl;
-    std::cout << "Task 2 executed successfully." << std::endl;
     return 0;
 }
