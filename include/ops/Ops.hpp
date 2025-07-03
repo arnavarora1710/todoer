@@ -13,5 +13,4 @@ class Ops
 public:
     virtual ~Ops() = default;
     virtual std::any execute() const = 0;
-    virtual std::string to_string() const = 0;
 };

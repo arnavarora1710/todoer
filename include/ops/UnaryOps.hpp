@@ -30,11 +30,6 @@ public:
     {
         return m_func(arg);
     }
-
-    std::string to_string() const override
-    {
-        return "UnaryOps " + std::to_string(std::any_cast<int>(arg));
-    }
 };
 
 // Factory function to create unique_ptr with deduction

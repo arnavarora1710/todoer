@@ -19,6 +19,7 @@ private:
     // needs the id of the task + operation to execute
     std::size_t m_id{};
     std::unique_ptr<Ops> m_operation{};
+    // TODO: make this a smart pointer
     Expression *m_target_expr{}; // pointer to the expression node this task will modify
 
 public:

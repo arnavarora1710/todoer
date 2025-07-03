@@ -26,7 +26,7 @@ inline std::pair<std::monostate, int> prefixBindingPower(const std::string &op)
     case '+':
     case '-':
         // can only bind to the right
-        return {std::monostate{}, 9};
+        return {std::monostate{}, 7};
     default:
         throw std::runtime_error("Unknown operator: " + op);
     }
@@ -37,16 +37,14 @@ inline std::pair<int, int> infixBindingPower(const std::string &op)
     assert(op.size() == 1);
     switch (op[0])
     {
-    case '=':
-        return {1, 2};
     case '+':
     case '-':
-        return {3, 4};
+        return {1, 2};
     case '*':
     case '/':
-        return {5, 6};
+        return {3, 4};
     case '^':
-        return {7, 8};
+        return {5, 6};
     default:
         throw std::runtime_error("Unknown operator: " + op);
     }

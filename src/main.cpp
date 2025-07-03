@@ -2,71 +2,62 @@
 #include "TaskGraph.hpp"
 #include "Expression.hpp"
 #include "Lexer.hpp"
+#include "Scheduler.hpp"
 #include <iostream>
 #include <any>
 #include <functional>
 #include <unordered_map>
 #include <variant>
 
-std::variant<int, double> evaluate(Expression &expr, VariableMap &variables)
+std::variant<int, double> evaluate(Expression &expr)
 {
-    TaskGraph tg(expr, variables);
-    while (!tg.m_leaves.empty())
+    TaskGraph tg(expr);
+    Scheduler scheduler(tg);
+    return scheduler.schedule(expr);
+}
+
+std::vector<std::string> splitOnEqual(std::string_view input)
+{
+    std::vector<std::string> result;
+    std::string_view::size_type pos = 0;
+    while (pos != std::string_view::npos)
     {
-        auto &leaf = tg.m_leaves.front();
-        auto result = leaf.execute();
-        tg.m_leaves.clear();
-        auto leaves = getLeaves(expr);
-        tg.m_leaves = std::move(leaves);
-        if (tg.m_leaves.empty())
+        auto equal_pos = input.find('=', pos);
+        if (equal_pos != std::string_view::npos)
         {
-            // Handle both int and double results
-            try
-            {
-                return std::any_cast<int>(result);
-            }
-            catch (const std::bad_any_cast &)
-            {
-                try
-                {
-                    return std::any_cast<double>(result);
-                }
-                catch (const std::bad_any_cast &)
-                {
-                    throw std::runtime_error("Unsupported result type");
-                }
-            }
+            result.push_back(std::string(input.substr(pos, equal_pos - pos)));
+            pos = equal_pos + 1;
+        }
+        else
+        {
+            result.push_back(std::string(input.substr(pos)));
             break;
         }
     }
-    assert(expr.isAtom());
-    auto atom = std::get<Expression::Atom>(expr.value);
-    if (variables.find(atom.value) != variables.end())
+    return result;
+}
+
+std::string interpret(std::string_view input, VariableMap &variables)
+{
+    auto split = splitOnEqual(input);
+    assert(split.size() <= 2);
+    if (split.size() == 2)
     {
-        return variables[atom.value];
+        auto lhs = split[0];
+        while (lhs.back() == ' ')
+            lhs.pop_back();
+        Expression rhs = from_string(split[1], variables);
+        variables[lhs] = evaluate(rhs);
     }
     else
     {
-        std::size_t pos;
-        try
-        {
-            std::stoi(atom.value, &pos);
-            if (pos == atom.value.size())
-                return std::stoi(atom.value);
-            throw std::invalid_argument("");
-        }
-        catch (const std::invalid_argument &)
-        {
-            try
-            {
-                return std::stod(atom.value);
-            }
-            catch (const std::invalid_argument &)
-            {
-                throw std::runtime_error("Unsupported result type");
-            }
-        }
+        Expression new_expr = from_string(input, variables);
+        auto result = evaluate(new_expr);
+        return std::visit([&](auto result)
+                          { return std::to_string(result) + "\n"; },
+                          result);
     }
+    return "";
 }
 
 int main()
@@ -79,23 +70,7 @@ int main()
         std::getline(std::cin, input);
         if (input == "exit")
             break;
-        VariableMap dummy;
-        Expression expr = from_string(input, dummy);
-        if (expr.is_assign())
-        {
-            auto lhs = expr.get_assign_lhs();
-            expr = from_string(input, variables);
-            auto rhs = expr.get_assign_rhs();
-            variables[lhs] = evaluate(rhs, variables);
-        }
-        else
-        {
-            expr = from_string(input, variables);
-            auto result = evaluate(expr, variables);
-            std::visit([&](auto result)
-                       { std::cout << result << std::endl; }, result);
-        }
+        std::cout << interpret(input, variables);
     }
-
     return 0;
 }

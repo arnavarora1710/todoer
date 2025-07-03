@@ -1,52 +1,16 @@
 #include "TaskGraph.hpp"
-#include "ops/Ops.hpp"
-#include "ops/UnaryOps.hpp"
-#include "ops/BinaryOps.hpp"
 #include <cassert>
 
 namespace Helper
 {
     // Helper function to extract value from atom
-    std::variant<int, double> extractAtomValue(const Expression::Atom &atom)
+    std::variant<int, double> extractAtomValue(const Expression &atom)
     {
-        if (atom.value.find('.') != std::string::npos)
-            return std::stod(atom.value);
+        auto &atom_value = std::get<Expression::Atom>(atom.value).value;
+        if (atom_value.find('.') != std::string::npos)
+            return std::stod(atom_value);
         else
-            return std::stoi(atom.value);
-    }
-
-    // Helper function to create unary operation
-    template <typename T>
-    std::unique_ptr<Ops> createUnaryOp(const std::string &op, T value)
-    {
-        switch (op[0])
-        {
-        case '+':
-            return make_unary_ops(std::identity{}, value);
-        case '-':
-            return make_unary_ops(std::negate<T>{}, value);
-        default:
-            throw std::runtime_error("Unknown unary operator: " + op);
-        }
-    }
-
-    // Helper function to create binary operation
-    template <typename T, typename U>
-    std::unique_ptr<Ops> createBinaryOp(const std::string &op, T value1, U value2)
-    {
-        switch (op[0])
-        {
-        case '+':
-            return make_binary_ops(std::plus<decltype(value1 + value2)>{}, value1, value2);
-        case '-':
-            return make_binary_ops(std::minus<decltype(value1 - value2)>{}, value1, value2);
-        case '*':
-            return make_binary_ops(std::multiplies<decltype(value1 * value2)>{}, value1, value2);
-        case '/':
-            return make_binary_ops(std::divides<decltype(value1 / value2)>{}, value1, value2);
-        default:
-            throw std::runtime_error("Unknown binary operator: " + op);
-        }
+            return std::stoi(atom_value);
     }
 
     // Helper function to append leaves from one deque to another
@@ -65,6 +29,15 @@ std::deque<Task> getLeaves(const Expression &expr)
     if (expr.isAtom())
     {
         // No task required - this will only happen if the expression is a single atom
+        auto value = Helper::extractAtomValue(expr);
+        auto taskOp = std::visit(
+            [&](auto value)
+            {
+                return Helper::createNoOp(value);
+            },
+            value);
+        Task task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(&expr));
+        leaves.push_back(std::move(task));
         return leaves;
     }
 
@@ -79,7 +52,7 @@ std::deque<Task> getLeaves(const Expression &expr)
         const auto &operand = op.operands[0];
         if (operand.isAtom())
         {
-            auto value = Helper::extractAtomValue(std::get<Expression::Atom>(operand.value));
+            auto value = Helper::extractAtomValue(operand);
             auto taskOp = std::visit(
                 [&](auto value)
                 {
@@ -104,8 +77,8 @@ std::deque<Task> getLeaves(const Expression &expr)
         if (operand1.isAtom() && operand2.isAtom())
         {
             // Both operands are atoms
-            auto value1 = Helper::extractAtomValue(std::get<Expression::Atom>(operand1.value));
-            auto value2 = Helper::extractAtomValue(std::get<Expression::Atom>(operand2.value));
+            auto value1 = Helper::extractAtomValue(operand1);
+            auto value2 = Helper::extractAtomValue(operand2);
             auto taskOp = std::visit(
                 [&](auto value1, auto value2)
                 {
@@ -133,8 +106,7 @@ std::deque<Task> getLeaves(const Expression &expr)
     return leaves;
 }
 
-TaskGraph::TaskGraph(Expression &expr, VariableMap &variables)
-    : m_variables(variables)
+TaskGraph::TaskGraph(Expression &expr)
 {
     m_leaves = getLeaves(expr);
 }

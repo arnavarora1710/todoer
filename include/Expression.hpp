@@ -29,7 +29,6 @@ struct Expression
     Expression *getParent() const { return parent; }
 
     std::string to_string() const;
-    bool is_assign() const;
-    std::string get_assign_lhs() const;
-    Expression get_assign_rhs() const;
 };
+
+void populateParentPointers(Expression &expr, Expression *parent = nullptr);

@@ -35,11 +35,6 @@ public:
     {
         return m_func(arg1, arg2);
     }
-
-    std::string to_string() const override
-    {
-        return "BinaryOps " + std::to_string(std::any_cast<int>(arg1)) + " " + std::to_string(std::any_cast<int>(arg2));
-    }
 };
 
 // deduction guide for BinaryOps

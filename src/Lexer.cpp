@@ -84,6 +84,9 @@ Expression Lexer::parseExpression(VariableMap &variables, int min_binding_power)
                 lhs = Expression(Expression::Atom{token->value});
             }
         }
+
+        // by this point, the lhs has been formed
+
         while (true)
         {
             auto next_token = peek();
@@ -121,5 +124,7 @@ Expression Lexer::parseExpression(VariableMap &variables, int min_binding_power)
 Expression from_string(std::string_view input, VariableMap &variables)
 {
     Lexer lexer(input);
-    return lexer.parseExpression(variables, 0);
+    auto expr = lexer.parseExpression(variables, 0);
+    populateParentPointers(expr);
+    return expr;
 }

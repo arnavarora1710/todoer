@@ -27,48 +27,14 @@ std::string Expression::to_string() const
     return std::move(result);
 }
 
-bool Expression::is_assign() const
+void populateParentPointers(Expression &expr, Expression *parent)
 {
-    if (isOperation())
+    expr.parent = parent;
+    if (expr.isOperation())
     {
-        const auto &op = std::get<Operation>(value);
-        if (op.op == "=")
+        for (auto &operand : std::get<Expression::Operation>(expr.value).operands)
         {
-            const auto &atom = std::get<Atom>(op.operands[0].value);
-            size_t pos;
-            try
-            {
-                std::stoi(atom.value, &pos);
-                if (pos == atom.value.length())
-                {
-                    throw std::invalid_argument("Number literals can't be assigned to!");
-                }
-            }
-            catch (const std::invalid_argument &e)
-            {
-                // this is ok, it's a variable name
-                return true;
-            }
+            populateParentPointers(operand, &expr);
         }
     }
-    return false;
-}
-
-std::string Expression::get_assign_lhs() const
-{
-    assert(is_assign());
-    const auto &op = std::get<Operation>(value);
-    if (op.operands[0].isAtom())
-    {
-        auto atom = std::get<Atom>(op.operands[0].value);
-        return std::move(atom.value);
-    }
-    throw std::runtime_error("Expression is not an assignment");
-}
-
-Expression Expression::get_assign_rhs() const
-{
-    assert(is_assign());
-    const auto &op = std::get<Operation>(value);
-    return op.operands[1];
 }
