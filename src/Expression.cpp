@@ -20,21 +20,22 @@ std::string Expression::to_string() const
         for (const auto &arg : op.operands)
         {
             result.push_back(' ');
-            result += arg.to_string();
+            result += arg->to_string();
         }
         result.push_back(')');
     }
     return std::move(result);
 }
 
-void populateParentPointers(Expression &expr, Expression *parent)
+void populateParentPointers(Expression &expr, std::shared_ptr<Expression> parent)
 {
     expr.parent = parent;
     if (expr.isOperation())
     {
         for (auto &operand : std::get<Expression::Operation>(expr.value).operands)
         {
-            populateParentPointers(operand, &expr);
+            std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
+            populateParentPointers(*operand, expr_ptr);
         }
     }
 }

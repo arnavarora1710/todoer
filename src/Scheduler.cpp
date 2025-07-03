@@ -25,7 +25,7 @@ std::variant<int, double> Scheduler::schedule(Expression &expr)
             bool allAtoms = true;
             for (auto &operand : op.operands)
             {
-                if (operand.isOperation())
+                if (operand->isOperation())
                 {
                     allAtoms = false;
                     break;
@@ -38,7 +38,7 @@ std::variant<int, double> Scheduler::schedule(Expression &expr)
                 if (numOperands == 1)
                 {
                     // unary operation
-                    auto value = Helper::extractAtomValue(op.operands[0]);
+                    auto value = Helper::extractAtomValue(*op.operands[0]);
                     taskOp = std::visit(
                         [&](auto value)
                         {
@@ -49,8 +49,8 @@ std::variant<int, double> Scheduler::schedule(Expression &expr)
                 else
                 {
                     // binary operation
-                    auto value1 = Helper::extractAtomValue(op.operands[0]);
-                    auto value2 = Helper::extractAtomValue(op.operands[1]);
+                    auto value1 = Helper::extractAtomValue(*op.operands[0]);
+                    auto value2 = Helper::extractAtomValue(*op.operands[1]);
                     taskOp = std::visit(
                         [&](auto value1, auto value2)
                         {
@@ -58,7 +58,7 @@ std::variant<int, double> Scheduler::schedule(Expression &expr)
                         },
                         value1, value2);
                 }
-                leaves.push_back(Task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(par)));
+                leaves.push_back(Task(Task::s_id_counter++, std::move(taskOp), std::move(par)));
             }
         }
         leaves.pop_front();

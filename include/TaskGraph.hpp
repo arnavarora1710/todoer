@@ -57,6 +57,25 @@ namespace Helper
             return make_binary_ops(std::multiplies<decltype(value1 * value2)>{}, value1, value2);
         case '/':
             return make_binary_ops(std::divides<decltype(value1 / value2)>{}, value1, value2);
+        case '^':
+            return make_binary_ops([](auto a, auto b)
+                                   { return std::pow(a, b); }, value1, value2);
+        case '&':
+            if (std::is_same_v<decltype(value1), int> && std::is_same_v<decltype(value2), int>)
+                return make_binary_ops([](auto a, auto b)
+                                       { return a & b; },
+                                       static_cast<int>(value1),
+                                       static_cast<int>(value2));
+            else
+                throw std::runtime_error("Invalid operands for bitwise AND operator, both operands must be integers");
+        case '|':
+            if (std::is_same_v<decltype(value1), int> && std::is_same_v<decltype(value2), int>)
+                return make_binary_ops([](auto a, auto b)
+                                       { return a | b; },
+                                       static_cast<int>(value1),
+                                       static_cast<int>(value2));
+            else
+                throw std::runtime_error("Invalid operands for bitwise OR operator, both operands must be integers");
         default:
             throw std::runtime_error("Unknown binary operator: " + op);
         }
@@ -86,4 +105,4 @@ struct TaskGraph
     ~TaskGraph() = default;
 };
 
-std::deque<Task> getLeaves(const Expression &expr);
+std::deque<Task> getLeaves(Expression &expr);

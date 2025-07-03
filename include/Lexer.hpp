@@ -22,7 +22,7 @@ public:
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
-    Expression parseExpression(VariableMap &variables, int min_binding_power = 0);
+    std::shared_ptr<Expression> parseExpression(VariableMap &variables, int min_binding_power = 0);
 };
 
-Expression from_string(std::string_view input, VariableMap &variables);
+std::shared_ptr<Expression> from_string(std::string_view input, VariableMap &variables);

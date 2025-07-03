@@ -19,17 +19,16 @@ private:
     // needs the id of the task + operation to execute
     std::size_t m_id{};
     std::unique_ptr<Ops> m_operation{};
-    // TODO: make this a smart pointer
-    Expression *m_target_expr{}; // pointer to the expression node this task will modify
+    std::shared_ptr<Expression> m_target_expr{}; // pointer to the expression node this task will modify
 
 public:
     inline static std::size_t s_id_counter = 0;
-    explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation, Expression *target_expr = nullptr)
+    explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation, std::shared_ptr<Expression> target_expr = std::make_shared<Expression>())
         : m_id{id}, m_operation{std::move(operation)}, m_target_expr{target_expr} {}
 
     std::size_t getId() const { return m_id; }
     std::unique_ptr<Ops> &getOperation() { return m_operation; }
-    Expression *getTargetExpr() const { return m_target_expr; }
+    std::shared_ptr<Expression> &getTargetExpr() { return m_target_expr; }
 
     std::any execute() const
     {

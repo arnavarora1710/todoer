@@ -2,6 +2,7 @@
 #include <cctype>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 Lexer::Lexer(std::string_view input)
 {
@@ -48,13 +49,13 @@ std::optional<Token> Lexer::peek() noexcept
     return tokens.back();
 }
 
-Expression Lexer::parseExpression(VariableMap &variables, int min_binding_power)
+std::shared_ptr<Expression> Lexer::parseExpression(VariableMap &variables, int min_binding_power)
 {
     auto token = next();
     if (token->type == Token::Type::Atom ||
         (token->type == Token::Type::Op && (token->value == "(" || token->value == "+" || token->value == "-")))
     {
-        Expression lhs;
+        std::shared_ptr<Expression> lhs;
         if (token->type == Token::Type::Op)
         {
             if (token->value == "(")
@@ -68,20 +69,22 @@ Expression Lexer::parseExpression(VariableMap &variables, int min_binding_power)
                 // has to be a prefix op (unary + or -)
                 auto [_, rbp] = prefixBindingPower(token->value);
                 auto rhs = parseExpression(variables, rbp);
-                lhs = Expression(Expression::Operation{token->value, {rhs}});
+                lhs = std::make_shared<Expression>(Expression::Operation{token->value,
+                                                                         {rhs}});
             }
         }
         else
         {
             if (variables.find(token->value) != variables.end())
             {
-                lhs = Expression(Expression::Atom{
+                lhs = std::make_shared<Expression>(Expression::Atom{
                     std::visit([](auto v)
-                               { return std::to_string(v); }, variables[token->value])});
+                               { return std::to_string(v); },
+                               variables[token->value])});
             }
             else
             {
-                lhs = Expression(Expression::Atom{token->value});
+                lhs = std::make_shared<Expression>(Expression::Atom{token->value});
             }
         }
 
@@ -105,26 +108,29 @@ Expression Lexer::parseExpression(VariableMap &variables, int min_binding_power)
                     break; // the left op is of higher priority, so stop tree construction here
                 else
                     next(); // consume op
-                Expression rhs = parseExpression(variables, rbp);
-                lhs = Expression(Expression::Operation{next_token->value, {lhs, rhs}});
+                auto rhs = parseExpression(variables, rbp);
+                lhs = std::make_shared<Expression>(Expression::Operation{next_token->value,
+                                                                         {lhs, rhs}});
             }
             else
             {
-                throw std::runtime_error("Unexpected Atom: " + next_token->value);
+                throw std::runtime_error("Invalid token: " + next_token->value +
+                                         "\nVariable names can only contain letters, digits, and underscores");
             }
         }
         return lhs;
     }
     else
     {
-        throw std::runtime_error("Unexpected token while parsing expression");
+        throw std::runtime_error("Invalid token: " + token->value +
+                                 "\nVariable names can only contain letters, digits, and underscores");
     }
 }
 
-Expression from_string(std::string_view input, VariableMap &variables)
+std::shared_ptr<Expression> from_string(std::string_view input, VariableMap &variables)
 {
     Lexer lexer(input);
     auto expr = lexer.parseExpression(variables, 0);
-    populateParentPointers(expr);
+    populateParentPointers(*expr);
     return expr;
 }

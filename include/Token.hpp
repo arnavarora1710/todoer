@@ -45,6 +45,10 @@ inline std::pair<int, int> infixBindingPower(const std::string &op)
         return {3, 4};
     case '^':
         return {5, 6};
+    case '|':
+        return {9, 10};
+    case '&':
+        return {11, 12};
     default:
         throw std::runtime_error("Unknown operator: " + op);
     }

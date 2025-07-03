@@ -7,10 +7,18 @@ namespace Helper
     std::variant<int, double> extractAtomValue(const Expression &atom)
     {
         auto &atom_value = std::get<Expression::Atom>(atom.value).value;
-        if (atom_value.find('.') != std::string::npos)
-            return std::stod(atom_value);
-        else
-            return std::stoi(atom_value);
+        try
+        {
+            if (atom_value.find('.') != std::string::npos)
+                return std::stod(atom_value);
+            else
+                return std::stoi(atom_value);
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("An error occurred while parsing the atom value: " + atom_value +
+                                     "\nPress Ctrl+C or type 'exit' to exit the program");
+        }
     }
 
     // Helper function to append leaves from one deque to another
@@ -22,7 +30,7 @@ namespace Helper
     }
 }
 
-std::deque<Task> getLeaves(const Expression &expr)
+std::deque<Task> getLeaves(Expression &expr)
 {
     std::deque<Task> leaves;
 
@@ -36,7 +44,8 @@ std::deque<Task> getLeaves(const Expression &expr)
                 return Helper::createNoOp(value);
             },
             value);
-        Task task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(&expr));
+        std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
+        Task task(Task::s_id_counter++, std::move(taskOp), expr_ptr);
         leaves.push_back(std::move(task));
         return leaves;
     }
@@ -50,22 +59,23 @@ std::deque<Task> getLeaves(const Expression &expr)
     {
         // Unary operation
         const auto &operand = op.operands[0];
-        if (operand.isAtom())
+        if (operand->isAtom())
         {
-            auto value = Helper::extractAtomValue(operand);
+            auto value = Helper::extractAtomValue(*operand);
             auto taskOp = std::visit(
                 [&](auto value)
                 {
                     return Helper::createUnaryOp(op.op, value);
                 },
                 value);
-            Task task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(&expr));
+            std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
+            Task task(Task::s_id_counter++, std::move(taskOp), expr_ptr);
             leaves.push_back(std::move(task));
         }
         else
         {
             // Recursively get leaves from operand
-            Helper::appendLeaves(leaves, getLeaves(const_cast<const Expression &>(operand)));
+            Helper::appendLeaves(leaves, getLeaves(*operand));
         }
     }
     else
@@ -74,11 +84,11 @@ std::deque<Task> getLeaves(const Expression &expr)
         const auto &operand1 = op.operands[0];
         const auto &operand2 = op.operands[1];
 
-        if (operand1.isAtom() && operand2.isAtom())
+        if (operand1->isAtom() && operand2->isAtom())
         {
             // Both operands are atoms
-            auto value1 = Helper::extractAtomValue(operand1);
-            auto value2 = Helper::extractAtomValue(operand2);
+            auto value1 = Helper::extractAtomValue(*operand1);
+            auto value2 = Helper::extractAtomValue(*operand2);
             auto taskOp = std::visit(
                 [&](auto value1, auto value2)
                 {
@@ -86,19 +96,20 @@ std::deque<Task> getLeaves(const Expression &expr)
                 },
                 value1,
                 value2);
-            Task task(Task::s_id_counter++, std::move(taskOp), const_cast<Expression *>(&expr));
+            std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
+            Task task(Task::s_id_counter++, std::move(taskOp), expr_ptr);
             leaves.push_back(std::move(task));
         }
         else
         {
             // Handle mixed operand types
-            if (operand1.isOperation())
+            if (operand1->isOperation())
             {
-                Helper::appendLeaves(leaves, getLeaves(const_cast<const Expression &>(operand1)));
+                Helper::appendLeaves(leaves, getLeaves(*operand1));
             }
-            if (operand2.isOperation())
+            if (operand2->isOperation())
             {
-                Helper::appendLeaves(leaves, getLeaves(const_cast<const Expression &>(operand2)));
+                Helper::appendLeaves(leaves, getLeaves(*operand2));
             }
         }
     }

@@ -29,31 +29,50 @@ std::vector<std::string> splitOnEqual(std::string_view input)
 
 namespace Interpreter
 {
-    std::variant<int, double> evaluate(Expression &expr)
+    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr)
     {
-        TaskGraph task_graph(expr);
+        TaskGraph task_graph(*expr);
         Scheduler scheduler(task_graph);
-        return scheduler.schedule(expr);
+        return scheduler.schedule(*expr);
     }
 
     std::string interpret(std::string_view input, VariableMap &variables)
     {
         auto split = splitOnEqual(input);
-        assert(split.size() <= 2);
-        if (split.size() == 2)
+        std::variant<int, double> result;
+        if (split.size() > 2)
+        {
+            return "Invalid input";
+        }
+        else if (split.size() == 2)
         {
             auto lhs = split[0];
             while (lhs.back() == ' ')
                 lhs.pop_back();
-            Expression rhs = from_string(split[1], variables);
-            variables[lhs] = evaluate(rhs);
+            try
+            {
+                auto rhs = std::move(from_string(split[1], variables));
+                result = std::move(evaluate(rhs));
+                variables[lhs] = result;
+            }
+            catch (const std::exception &e)
+            {
+                return e.what();
+            }
         }
         else
         {
-            Expression expr = from_string(input, variables);
-            auto result = evaluate(expr);
+            try
+            {
+                auto expr = std::move(from_string(input, variables));
+                result = std::move(evaluate(expr));
+            }
+            catch (const std::exception &e)
+            {
+                return e.what();
+            }
             return std::visit([&](auto result)
-                              { return std::to_string(result) + "\n"; },
+                              { return std::to_string(result); },
                               result);
         }
         return "";

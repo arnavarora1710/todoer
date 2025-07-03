@@ -10,34 +10,34 @@ TEST_CASE("Testing Basic Arithmetic")
 
     SUBCASE("Addition")
     {
-        CHECK(Interpreter::interpret("1 + 2", variables) == "3\n");
-        CHECK(Interpreter::interpret("5 + 7", variables) == "12\n");
-        CHECK(Interpreter::interpret("0 + 0", variables) == "0\n");
-        CHECK(Interpreter::interpret("1.5 + 2.5", variables) == "4.000000\n");
+        CHECK(Interpreter::interpret("1 + 2", variables) == "3");
+        CHECK(Interpreter::interpret("5 + 7", variables) == "12");
+        CHECK(Interpreter::interpret("0 + 0", variables) == "0");
+        CHECK(Interpreter::interpret("1.5 + 2.5", variables) == "4.000000");
     }
 
     SUBCASE("Subtraction")
     {
-        CHECK(Interpreter::interpret("5 - 2", variables) == "3\n");
-        CHECK(Interpreter::interpret("10 - 7", variables) == "3\n");
-        CHECK(Interpreter::interpret("0 - 5", variables) == "-5\n");
-        CHECK(Interpreter::interpret("3.7 - 1.2", variables) == "2.500000\n");
+        CHECK(Interpreter::interpret("5 - 2", variables) == "3");
+        CHECK(Interpreter::interpret("10 - 7", variables) == "3");
+        CHECK(Interpreter::interpret("0 - 5", variables) == "-5");
+        CHECK(Interpreter::interpret("3.7 - 1.2", variables) == "2.500000");
     }
 
     SUBCASE("Multiplication")
     {
-        CHECK(Interpreter::interpret("3 * 4", variables) == "12\n");
-        CHECK(Interpreter::interpret("2 * 0", variables) == "0\n");
-        CHECK(Interpreter::interpret("1.5 * 2", variables) == "3.000000\n");
-        CHECK(Interpreter::interpret("2.5 * 3.2", variables) == "8.000000\n");
+        CHECK(Interpreter::interpret("3 * 4", variables) == "12");
+        CHECK(Interpreter::interpret("2 * 0", variables) == "0");
+        CHECK(Interpreter::interpret("1.5 * 2", variables) == "3.000000");
+        CHECK(Interpreter::interpret("2.5 * 3.2", variables) == "8.000000");
     }
 
     SUBCASE("Division")
     {
-        CHECK(Interpreter::interpret("10 / 2", variables) == "5\n");
-        CHECK(Interpreter::interpret("15 / 3", variables) == "5\n");
-        CHECK(Interpreter::interpret("7.5 / 2.5", variables) == "3.000000\n");
-        CHECK(Interpreter::interpret("1 / 3", variables) == "0\n"); // Integer division
+        CHECK(Interpreter::interpret("10 / 2", variables) == "5");
+        CHECK(Interpreter::interpret("15 / 3", variables) == "5");
+        CHECK(Interpreter::interpret("7.5 / 2.5", variables) == "3.000000");
+        CHECK(Interpreter::interpret("1 / 3", variables) == "0"); // Integer division
     }
 }
 
@@ -48,10 +48,10 @@ TEST_CASE("Testing Variables")
     SUBCASE("Single Variable Operations")
     {
         variables["x"] = 10;
-        CHECK(Interpreter::interpret("x + 5", variables) == "15\n");
-        CHECK(Interpreter::interpret("x - 3", variables) == "7\n");
-        CHECK(Interpreter::interpret("x * 2", variables) == "20\n");
-        CHECK(Interpreter::interpret("x / 2", variables) == "5\n");
+        CHECK(Interpreter::interpret("x + 5", variables) == "15");
+        CHECK(Interpreter::interpret("x - 3", variables) == "7");
+        CHECK(Interpreter::interpret("x * 2", variables) == "20");
+        CHECK(Interpreter::interpret("x / 2", variables) == "5");
     }
 
     SUBCASE("Multiple Variable Operations")
@@ -60,13 +60,13 @@ TEST_CASE("Testing Variables")
         variables["b"] = 3;
         variables["c"] = 2;
 
-        CHECK(Interpreter::interpret("a + b", variables) == "8\n");
-        CHECK(Interpreter::interpret("a - b", variables) == "2\n");
-        CHECK(Interpreter::interpret("a * b", variables) == "15\n");
-        CHECK(Interpreter::interpret("a / b", variables) == "1\n");
-        CHECK(Interpreter::interpret("a + b + c", variables) == "10\n");
-        CHECK(Interpreter::interpret("a * b + c", variables) == "17\n");
-        CHECK(Interpreter::interpret("a + b * c", variables) == "11\n");
+        CHECK(Interpreter::interpret("a + b", variables) == "8");
+        CHECK(Interpreter::interpret("a - b", variables) == "2");
+        CHECK(Interpreter::interpret("a * b", variables) == "15");
+        CHECK(Interpreter::interpret("a / b", variables) == "1");
+        CHECK(Interpreter::interpret("a + b + c", variables) == "10");
+        CHECK(Interpreter::interpret("a * b + c", variables) == "17");
+        CHECK(Interpreter::interpret("a + b * c", variables) == "11");
     }
 
     SUBCASE("Floating Point Variables")
@@ -74,8 +74,8 @@ TEST_CASE("Testing Variables")
         variables["pi"] = 3.14159;
         variables["e"] = 2.71828;
 
-        CHECK(Interpreter::interpret("pi + e", variables) == "5.859870\n");
-        CHECK(Interpreter::interpret("pi * 2", variables) == "6.283180\n");
+        CHECK(Interpreter::interpret("pi + e", variables) == "5.859870");
+        CHECK(Interpreter::interpret("pi * 2", variables) == "6.283180");
     }
 }
 
@@ -83,40 +83,40 @@ TEST_CASE("Testing Operator Precedence")
 {
     VariableMap variables;
 
-    CHECK(Interpreter::interpret("1 + 2 * 3", variables) == "7\n");
-    CHECK(Interpreter::interpret("2 * 3 + 1", variables) == "7\n");
-    CHECK(Interpreter::interpret("10 - 2 * 3", variables) == "4\n");
-    CHECK(Interpreter::interpret("2 * 3 * 4", variables) == "24\n");
-    CHECK(Interpreter::interpret("20 / 4 / 2", variables) == "2\n"); // Left associative
-    CHECK(Interpreter::interpret("1 + 2 * 3 + 4", variables) == "11\n");
-    CHECK(Interpreter::interpret("1 * 2 + 3 * 4", variables) == "14\n");
+    CHECK(Interpreter::interpret("1 + 2 * 3", variables) == "7");
+    CHECK(Interpreter::interpret("2 * 3 + 1", variables) == "7");
+    CHECK(Interpreter::interpret("10 - 2 * 3", variables) == "4");
+    CHECK(Interpreter::interpret("2 * 3 * 4", variables) == "24");
+    CHECK(Interpreter::interpret("20 / 4 / 2", variables) == "2"); // Left associative
+    CHECK(Interpreter::interpret("1 + 2 * 3 + 4", variables) == "11");
+    CHECK(Interpreter::interpret("1 * 2 + 3 * 4", variables) == "14");
 }
 
 TEST_CASE("Testing Parentheses")
 {
     VariableMap variables;
 
-    CHECK(Interpreter::interpret("(1 + 2) * 3", variables) == "9\n");
-    CHECK(Interpreter::interpret("1 + (2 * 3)", variables) == "7\n");
-    CHECK(Interpreter::interpret("(10 - 2) / 2", variables) == "4\n");
-    CHECK(Interpreter::interpret("((1 + 2) * 3) + 4", variables) == "13\n");
-    CHECK(Interpreter::interpret("1 + ((2 + 3) * 4)", variables) == "21\n");
-    CHECK(Interpreter::interpret("(1 + 2) * (3 + 4)", variables) == "21\n");
+    CHECK(Interpreter::interpret("(1 + 2) * 3", variables) == "9");
+    CHECK(Interpreter::interpret("1 + (2 * 3)", variables) == "7");
+    CHECK(Interpreter::interpret("(10 - 2) / 2", variables) == "4");
+    CHECK(Interpreter::interpret("((1 + 2) * 3) + 4", variables) == "13");
+    CHECK(Interpreter::interpret("1 + ((2 + 3) * 4)", variables) == "21");
+    CHECK(Interpreter::interpret("(1 + 2) * (3 + 4)", variables) == "21");
 }
 
 TEST_CASE("Testing Negative Numbers")
 {
     VariableMap variables;
 
-    CHECK(Interpreter::interpret("-5", variables) == "-5\n");
-    CHECK(Interpreter::interpret("-5 + 3", variables) == "-2\n");
-    CHECK(Interpreter::interpret("5 + (-3)", variables) == "2\n");
-    CHECK(Interpreter::interpret("-5 * -3", variables) == "15\n");
-    CHECK(Interpreter::interpret("-(5 + 3)", variables) == "-8\n");
+    CHECK(Interpreter::interpret("-5", variables) == "-5");
+    CHECK(Interpreter::interpret("-5 + 3", variables) == "-2");
+    CHECK(Interpreter::interpret("5 + (-3)", variables) == "2");
+    CHECK(Interpreter::interpret("-5 * -3", variables) == "15");
+    CHECK(Interpreter::interpret("-(5 + 3)", variables) == "-8");
 
     variables["neg"] = -10;
-    CHECK(Interpreter::interpret("neg + 5", variables) == "-5\n");
-    CHECK(Interpreter::interpret("-neg", variables) == "10\n");
+    CHECK(Interpreter::interpret("neg + 5", variables) == "-5");
+    CHECK(Interpreter::interpret("-neg", variables) == "10");
 }
 
 TEST_CASE("Testing Complex Expressions")
@@ -126,12 +126,12 @@ TEST_CASE("Testing Complex Expressions")
     variables["y"] = 3;
     variables["z"] = 4;
 
-    CHECK(Interpreter::interpret("x * y + z", variables) == "10\n");
-    CHECK(Interpreter::interpret("(x + y) * z", variables) == "20\n");
-    CHECK(Interpreter::interpret("x * (y + z)", variables) == "14\n");
-    CHECK(Interpreter::interpret("x + y * z - 1", variables) == "13\n");
-    CHECK(Interpreter::interpret("(x + y) * (z - 1)", variables) == "15\n");
-    CHECK(Interpreter::interpret("x * y * z + x + y + z", variables) == "33\n");
+    CHECK(Interpreter::interpret("x * y + z", variables) == "10");
+    CHECK(Interpreter::interpret("(x + y) * z", variables) == "20");
+    CHECK(Interpreter::interpret("x * (y + z)", variables) == "14");
+    CHECK(Interpreter::interpret("x + y * z - 1", variables) == "13");
+    CHECK(Interpreter::interpret("(x + y) * (z - 1)", variables) == "15");
+    CHECK(Interpreter::interpret("x * y * z + x + y + z", variables) == "33");
 }
 
 TEST_CASE("Testing Edge Cases")
@@ -140,22 +140,22 @@ TEST_CASE("Testing Edge Cases")
 
     SUBCASE("Zero Operations")
     {
-        CHECK(Interpreter::interpret("0", variables) == "0\n");
-        CHECK(Interpreter::interpret("0 + 0", variables) == "0\n");
-        CHECK(Interpreter::interpret("0 * 100", variables) == "0\n");
-        CHECK(Interpreter::interpret("100 * 0", variables) == "0\n");
+        CHECK(Interpreter::interpret("0", variables) == "0");
+        CHECK(Interpreter::interpret("0 + 0", variables) == "0");
+        CHECK(Interpreter::interpret("0 * 100", variables) == "0");
+        CHECK(Interpreter::interpret("100 * 0", variables) == "0");
     }
 
     SUBCASE("Large Numbers")
     {
-        CHECK(Interpreter::interpret("1000000 + 1", variables) == "1000001\n");
-        CHECK(Interpreter::interpret("999 * 1000", variables) == "999000\n");
+        CHECK(Interpreter::interpret("1000000 + 1", variables) == "1000001");
+        CHECK(Interpreter::interpret("999 * 1000", variables) == "999000");
     }
 
     SUBCASE("Many Decimal Places")
     {
-        CHECK(Interpreter::interpret("1.23456789 + 2.87654321", variables) == "4.111111\n");
-        CHECK(Interpreter::interpret("3.14159 * 2.71828", variables) == "8.539721\n");
+        CHECK(Interpreter::interpret("1.23456789 + 2.87654321", variables) == "4.111111");
+        CHECK(Interpreter::interpret("3.14159 * 2.71828", variables) == "8.539721");
     }
 }
 
@@ -164,20 +164,20 @@ TEST_CASE("Testing Long Expressions")
     VariableMap variables;
 
     // Original tests maintained
-    CHECK(Interpreter::interpret("1 + 2.2 * 3 + 4 + 5 + 6", variables) == "22.600000\n");
+    CHECK(Interpreter::interpret("1 + 2.2 * 3 + 4 + 5 + 6", variables) == "22.600000");
 
     // Additional long expressions
-    CHECK(Interpreter::interpret("1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10", variables) == "55\n");
-    CHECK(Interpreter::interpret("1 * 2 * 3 * 4 * 5", variables) == "120\n");
-    CHECK(Interpreter::interpret("100 - 1 - 2 - 3 - 4 - 5", variables) == "85\n");
+    CHECK(Interpreter::interpret("1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10", variables) == "55");
+    CHECK(Interpreter::interpret("1 * 2 * 3 * 4 * 5", variables) == "120");
+    CHECK(Interpreter::interpret("100 - 1 - 2 - 3 - 4 - 5", variables) == "85");
 
     variables["a"] = 1;
     variables["b"] = 2;
     variables["c"] = 3;
     variables["d"] = 4;
     variables["e"] = 5;
-    CHECK(Interpreter::interpret("a + b + c + d + e", variables) == "15\n");
-    CHECK(Interpreter::interpret("a * b * c * d * e", variables) == "120\n");
+    CHECK(Interpreter::interpret("a + b + c + d + e", variables) == "15");
+    CHECK(Interpreter::interpret("a * b * c * d * e", variables) == "120");
 }
 
 TEST_CASE("Performance Benchmarks")

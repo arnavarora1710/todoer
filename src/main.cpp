@@ -11,7 +11,10 @@ int main()
         std::getline(std::cin, input);
         if (input == "exit")
             break;
-        std::cout << Interpreter::interpret(input, variables);
+        auto result = Interpreter::interpret(input, variables);
+        std::cout << result;
+        if (!result.empty())
+            std::cout << std::endl;
     }
     return 0;
 }
