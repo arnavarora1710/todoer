@@ -1,0 +1,290 @@
+#include "third_party/doctest.h"
+#include "Interpreter.hpp"
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+
+TEST_CASE("Testing Basic Arithmetic")
+{
+    VariableMap variables;
+
+    SUBCASE("Addition")
+    {
+        CHECK(Interpreter::interpret("1 + 2", variables) == "3\n");
+        CHECK(Interpreter::interpret("5 + 7", variables) == "12\n");
+        CHECK(Interpreter::interpret("0 + 0", variables) == "0\n");
+        CHECK(Interpreter::interpret("1.5 + 2.5", variables) == "4.000000\n");
+    }
+
+    SUBCASE("Subtraction")
+    {
+        CHECK(Interpreter::interpret("5 - 2", variables) == "3\n");
+        CHECK(Interpreter::interpret("10 - 7", variables) == "3\n");
+        CHECK(Interpreter::interpret("0 - 5", variables) == "-5\n");
+        CHECK(Interpreter::interpret("3.7 - 1.2", variables) == "2.500000\n");
+    }
+
+    SUBCASE("Multiplication")
+    {
+        CHECK(Interpreter::interpret("3 * 4", variables) == "12\n");
+        CHECK(Interpreter::interpret("2 * 0", variables) == "0\n");
+        CHECK(Interpreter::interpret("1.5 * 2", variables) == "3.000000\n");
+        CHECK(Interpreter::interpret("2.5 * 3.2", variables) == "8.000000\n");
+    }
+
+    SUBCASE("Division")
+    {
+        CHECK(Interpreter::interpret("10 / 2", variables) == "5\n");
+        CHECK(Interpreter::interpret("15 / 3", variables) == "5\n");
+        CHECK(Interpreter::interpret("7.5 / 2.5", variables) == "3.000000\n");
+        CHECK(Interpreter::interpret("1 / 3", variables) == "0\n"); // Integer division
+    }
+}
+
+TEST_CASE("Testing Variables")
+{
+    VariableMap variables;
+
+    SUBCASE("Single Variable Operations")
+    {
+        variables["x"] = 10;
+        CHECK(Interpreter::interpret("x + 5", variables) == "15\n");
+        CHECK(Interpreter::interpret("x - 3", variables) == "7\n");
+        CHECK(Interpreter::interpret("x * 2", variables) == "20\n");
+        CHECK(Interpreter::interpret("x / 2", variables) == "5\n");
+    }
+
+    SUBCASE("Multiple Variable Operations")
+    {
+        variables["a"] = 5;
+        variables["b"] = 3;
+        variables["c"] = 2;
+
+        CHECK(Interpreter::interpret("a + b", variables) == "8\n");
+        CHECK(Interpreter::interpret("a - b", variables) == "2\n");
+        CHECK(Interpreter::interpret("a * b", variables) == "15\n");
+        CHECK(Interpreter::interpret("a / b", variables) == "1\n");
+        CHECK(Interpreter::interpret("a + b + c", variables) == "10\n");
+        CHECK(Interpreter::interpret("a * b + c", variables) == "17\n");
+        CHECK(Interpreter::interpret("a + b * c", variables) == "11\n");
+    }
+
+    SUBCASE("Floating Point Variables")
+    {
+        variables["pi"] = 3.14159;
+        variables["e"] = 2.71828;
+
+        CHECK(Interpreter::interpret("pi + e", variables) == "5.859870\n");
+        CHECK(Interpreter::interpret("pi * 2", variables) == "6.283180\n");
+    }
+}
+
+TEST_CASE("Testing Operator Precedence")
+{
+    VariableMap variables;
+
+    CHECK(Interpreter::interpret("1 + 2 * 3", variables) == "7\n");
+    CHECK(Interpreter::interpret("2 * 3 + 1", variables) == "7\n");
+    CHECK(Interpreter::interpret("10 - 2 * 3", variables) == "4\n");
+    CHECK(Interpreter::interpret("2 * 3 * 4", variables) == "24\n");
+    CHECK(Interpreter::interpret("20 / 4 / 2", variables) == "2\n"); // Left associative
+    CHECK(Interpreter::interpret("1 + 2 * 3 + 4", variables) == "11\n");
+    CHECK(Interpreter::interpret("1 * 2 + 3 * 4", variables) == "14\n");
+}
+
+TEST_CASE("Testing Parentheses")
+{
+    VariableMap variables;
+
+    CHECK(Interpreter::interpret("(1 + 2) * 3", variables) == "9\n");
+    CHECK(Interpreter::interpret("1 + (2 * 3)", variables) == "7\n");
+    CHECK(Interpreter::interpret("(10 - 2) / 2", variables) == "4\n");
+    CHECK(Interpreter::interpret("((1 + 2) * 3) + 4", variables) == "13\n");
+    CHECK(Interpreter::interpret("1 + ((2 + 3) * 4)", variables) == "21\n");
+    CHECK(Interpreter::interpret("(1 + 2) * (3 + 4)", variables) == "21\n");
+}
+
+TEST_CASE("Testing Negative Numbers")
+{
+    VariableMap variables;
+
+    CHECK(Interpreter::interpret("-5", variables) == "-5\n");
+    CHECK(Interpreter::interpret("-5 + 3", variables) == "-2\n");
+    CHECK(Interpreter::interpret("5 + (-3)", variables) == "2\n");
+    CHECK(Interpreter::interpret("-5 * -3", variables) == "15\n");
+    CHECK(Interpreter::interpret("-(5 + 3)", variables) == "-8\n");
+
+    variables["neg"] = -10;
+    CHECK(Interpreter::interpret("neg + 5", variables) == "-5\n");
+    CHECK(Interpreter::interpret("-neg", variables) == "10\n");
+}
+
+TEST_CASE("Testing Complex Expressions")
+{
+    VariableMap variables;
+    variables["x"] = 2;
+    variables["y"] = 3;
+    variables["z"] = 4;
+
+    CHECK(Interpreter::interpret("x * y + z", variables) == "10\n");
+    CHECK(Interpreter::interpret("(x + y) * z", variables) == "20\n");
+    CHECK(Interpreter::interpret("x * (y + z)", variables) == "14\n");
+    CHECK(Interpreter::interpret("x + y * z - 1", variables) == "13\n");
+    CHECK(Interpreter::interpret("(x + y) * (z - 1)", variables) == "15\n");
+    CHECK(Interpreter::interpret("x * y * z + x + y + z", variables) == "33\n");
+}
+
+TEST_CASE("Testing Edge Cases")
+{
+    VariableMap variables;
+
+    SUBCASE("Zero Operations")
+    {
+        CHECK(Interpreter::interpret("0", variables) == "0\n");
+        CHECK(Interpreter::interpret("0 + 0", variables) == "0\n");
+        CHECK(Interpreter::interpret("0 * 100", variables) == "0\n");
+        CHECK(Interpreter::interpret("100 * 0", variables) == "0\n");
+    }
+
+    SUBCASE("Large Numbers")
+    {
+        CHECK(Interpreter::interpret("1000000 + 1", variables) == "1000001\n");
+        CHECK(Interpreter::interpret("999 * 1000", variables) == "999000\n");
+    }
+
+    SUBCASE("Many Decimal Places")
+    {
+        CHECK(Interpreter::interpret("1.23456789 + 2.87654321", variables) == "4.111111\n");
+        CHECK(Interpreter::interpret("3.14159 * 2.71828", variables) == "8.539721\n");
+    }
+}
+
+TEST_CASE("Testing Long Expressions")
+{
+    VariableMap variables;
+
+    // Original tests maintained
+    CHECK(Interpreter::interpret("1 + 2.2 * 3 + 4 + 5 + 6", variables) == "22.600000\n");
+
+    // Additional long expressions
+    CHECK(Interpreter::interpret("1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10", variables) == "55\n");
+    CHECK(Interpreter::interpret("1 * 2 * 3 * 4 * 5", variables) == "120\n");
+    CHECK(Interpreter::interpret("100 - 1 - 2 - 3 - 4 - 5", variables) == "85\n");
+
+    variables["a"] = 1;
+    variables["b"] = 2;
+    variables["c"] = 3;
+    variables["d"] = 4;
+    variables["e"] = 5;
+    CHECK(Interpreter::interpret("a + b + c + d + e", variables) == "15\n");
+    CHECK(Interpreter::interpret("a * b * c * d * e", variables) == "120\n");
+}
+
+TEST_CASE("Performance Benchmarks")
+{
+    VariableMap variables;
+
+    SUBCASE("Small Expression Benchmark")
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            Interpreter::interpret("1 + 2 * 3", variables);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::stringstream str;
+        str << std::fixed << std::setprecision(5) << "1000 small expressions: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+        MESSAGE(str.str());
+    }
+
+    SUBCASE("Medium Expression Benchmark")
+    {
+        std::string medium_expr = "1 + 2 * 3 - 4 / 2 + 5 * (6 - 7) + 8";
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            Interpreter::interpret(medium_expr, variables);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::stringstream str;
+        str << std::fixed << std::setprecision(5) << "1000 medium expressions: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+        MESSAGE(str.str());
+    }
+
+    SUBCASE("Variable-Heavy Expression Benchmark")
+    {
+        variables["a"] = 1;
+        variables["b"] = 2;
+        variables["c"] = 3;
+        variables["d"] = 4;
+        variables["e"] = 5;
+        variables["f"] = 6;
+
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            Interpreter::interpret("a + b * c - d / e + f", variables);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::stringstream str;
+        str << std::fixed << std::setprecision(5) << "1000 variable expressions: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+        MESSAGE(str.str());
+    }
+
+    SUBCASE("Large Addition Chain Benchmark")
+    {
+        std::string big_input;
+        for (int i = 0; i < 1000; i++)
+        {
+            big_input += "1 + ";
+        }
+        big_input += "1";
+
+        auto start = std::chrono::high_resolution_clock::now();
+        Interpreter::interpret(big_input, variables);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::stringstream str;
+        str << std::fixed << std::setprecision(5) << "1000-term addition: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 << "s";
+        MESSAGE(str.str());
+    }
+
+    SUBCASE("Deep Parentheses Benchmark")
+    {
+        std::string deep_expr = "";
+        for (int i = 0; i < 100; i++)
+        {
+            deep_expr += "(";
+        }
+        deep_expr += "1";
+        for (int i = 0; i < 100; i++)
+        {
+            deep_expr += " + 1)";
+        }
+
+        auto start = std::chrono::high_resolution_clock::now();
+        Interpreter::interpret(deep_expr, variables);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::stringstream str;
+        str << std::fixed << std::setprecision(5) << "Deep parentheses (100 levels): "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+        MESSAGE(str.str());
+    }
+
+    SUBCASE("Floating Point Heavy Benchmark")
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            Interpreter::interpret("3.14159 * 2.71828 + 1.41421 / 1.73205", variables);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::stringstream str;
+        str << std::fixed << std::setprecision(5) << "1000 floating point expressions: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+        MESSAGE(str.str());
+    }
+}

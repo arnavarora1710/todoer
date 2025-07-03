@@ -23,3 +23,4 @@ add_executable(test_runner ${CORE_SRC} ${TEST_SRC})
 
 enable_testing()
 add_test(NAME test_parser COMMAND test_runner)
+add_test(NAME test_interpreter COMMAND test_runner)

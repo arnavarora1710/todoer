@@ -1,0 +1,15 @@
+#pragma once
+#include "TaskGraph.hpp"
+#include "Scheduler.hpp"
+#include "Expression.hpp"
+#include <string>
+#include <variant>
+#include <unordered_map>
+
+typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;
+
+namespace Interpreter
+{
+    std::variant<int, double> evaluate(Expression &expr);
+    std::string interpret(std::string_view input, VariableMap &variables);
+};
