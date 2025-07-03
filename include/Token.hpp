@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 #include <cassert>
+#include <variant>
 
 struct Token
 {
