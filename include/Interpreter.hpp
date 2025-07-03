@@ -4,6 +4,7 @@
 #include "Expression.hpp"
 #include <string>
 #include <variant>
+#include <memory>
 #include <unordered_map>
 
 typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;

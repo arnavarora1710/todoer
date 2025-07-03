@@ -7,6 +7,7 @@
 #include "ops/Ops.hpp"
 #include "Expression.hpp"
 #include <iostream>
+#include <memory>
 
 // this structure should store task metadata as well as
 // a pointer to the operation that the task will execute

@@ -8,6 +8,7 @@
 #include <optional>
 #include <unordered_map>
 #include <variant>
+#include <memory>
 
 typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;
 

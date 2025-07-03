@@ -1,5 +1,6 @@
 #include "TaskGraph.hpp"
 #include <cassert>
+#include <memory>
 
 namespace Helper
 {
