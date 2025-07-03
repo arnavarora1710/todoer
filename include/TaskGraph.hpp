@@ -12,6 +12,7 @@
 #include <memory>
 #include <functional>
 #include <stdexcept>
+#include <cmath>
 
 // Forward declarations
 class Ops;

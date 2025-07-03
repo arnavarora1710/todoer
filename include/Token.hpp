@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <cassert>
 
 struct Token
 {
