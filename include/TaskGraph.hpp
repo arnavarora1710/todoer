@@ -13,6 +13,7 @@
 #include <functional>
 #include <stdexcept>
 #include <cmath>
+#include <variant>
 
 // Forward declarations
 class Ops;

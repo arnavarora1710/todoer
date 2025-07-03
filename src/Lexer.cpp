@@ -69,8 +69,8 @@ std::shared_ptr<Expression> Lexer::parseExpression(VariableMap &variables, int m
                 // has to be a prefix op (unary + or -)
                 auto [_, rbp] = prefixBindingPower(token->value);
                 auto rhs = parseExpression(variables, rbp);
-                lhs = std::make_shared<Expression>(Expression::Operation{token->value,
-                                                                         {rhs}});
+                std::vector<std::shared_ptr<Expression>> operands{rhs};
+                lhs = std::make_shared<Expression>(Expression::Operation{token->value, operands});
             }
         }
         else
@@ -109,8 +109,8 @@ std::shared_ptr<Expression> Lexer::parseExpression(VariableMap &variables, int m
                 else
                     next(); // consume op
                 auto rhs = parseExpression(variables, rbp);
-                lhs = std::make_shared<Expression>(Expression::Operation{next_token->value,
-                                                                         {lhs, rhs}});
+                std::vector<std::shared_ptr<Expression>> operands{lhs, rhs};
+                lhs = std::make_shared<Expression>(Expression::Operation{next_token->value, operands});
             }
             else
             {
