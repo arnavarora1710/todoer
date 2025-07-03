@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include "Ops.hpp"
+#include "ops/Ops.hpp"
 #include "Expression.hpp"
 #include <iostream>
 

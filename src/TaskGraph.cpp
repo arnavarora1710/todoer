@@ -1,8 +1,8 @@
 #include "TaskGraph.hpp"
-#include "Ops.hpp"
-#include <iostream>
+#include "ops/Ops.hpp"
+#include "ops/UnaryOps.hpp"
+#include "ops/BinaryOps.hpp"
 #include <cassert>
-#include <algorithm>
 
 namespace Helper
 {
@@ -133,7 +133,7 @@ std::deque<Task> getLeaves(const Expression &expr)
     return leaves;
 }
 
-TaskGraph::TaskGraph(Expression &expr, std::unordered_map<std::string, std::variant<int, double>> &variables)
+TaskGraph::TaskGraph(Expression &expr, VariableMap &variables)
     : m_variables(variables)
 {
     m_leaves = getLeaves(expr);

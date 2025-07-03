@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <variant>
 
-std::variant<int, double> evaluate(Expression &expr, std::unordered_map<std::string, std::variant<int, double>> &variables)
+std::variant<int, double> evaluate(Expression &expr, VariableMap &variables)
 {
     TaskGraph tg(expr, variables);
     while (!tg.m_leaves.empty())
@@ -71,7 +71,7 @@ std::variant<int, double> evaluate(Expression &expr, std::unordered_map<std::str
 
 int main()
 {
-    std::unordered_map<std::string, std::variant<int, double>> variables;
+    VariableMap variables;
     while (true)
     {
         std::cout << ">>> ";
@@ -79,7 +79,7 @@ int main()
         std::getline(std::cin, input);
         if (input == "exit")
             break;
-        std::unordered_map<std::string, std::variant<int, double>> dummy;
+        VariableMap dummy;
         Expression expr = from_string(input, dummy);
         if (expr.is_assign())
         {

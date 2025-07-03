@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <variant>
 
+typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;
+
 class Lexer
 {
 private:
@@ -20,7 +22,7 @@ public:
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
-    Expression parseExpression(std::unordered_map<std::string, std::variant<int, double>> &variables, int min_binding_power = 0);
+    Expression parseExpression(VariableMap &variables, int min_binding_power = 0);
 };
 
-Expression from_string(std::string_view input, std::unordered_map<std::string, std::variant<int, double>> &variables);
+Expression from_string(std::string_view input, VariableMap &variables);

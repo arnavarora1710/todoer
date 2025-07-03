@@ -14,7 +14,9 @@ Lexer::Lexer(std::string_view input)
         else if (std::isdigit(token) || std::isalpha(token))
         {
             std::string atom;
-            while (token_iter != input.end() && (std::isdigit(*token_iter) || std::isalpha(*token_iter) || *token_iter == '.' || *token_iter == '_'))
+            while (token_iter != input.end() &&
+                   (std::isdigit(*token_iter) || std::isalpha(*token_iter) ||
+                    *token_iter == '.' || *token_iter == '_'))
             {
                 atom += *token_iter;
                 ++token_iter;
@@ -46,7 +48,7 @@ std::optional<Token> Lexer::peek() noexcept
     return tokens.back();
 }
 
-Expression Lexer::parseExpression(std::unordered_map<std::string, std::variant<int, double>> &variables, int min_binding_power)
+Expression Lexer::parseExpression(VariableMap &variables, int min_binding_power)
 {
     auto token = next();
     if (token->type == Token::Type::Atom ||
@@ -116,7 +118,7 @@ Expression Lexer::parseExpression(std::unordered_map<std::string, std::variant<i
     }
 }
 
-Expression from_string(std::string_view input, std::unordered_map<std::string, std::variant<int, double>> &variables)
+Expression from_string(std::string_view input, VariableMap &variables)
 {
     Lexer lexer(input);
     return lexer.parseExpression(variables, 0);

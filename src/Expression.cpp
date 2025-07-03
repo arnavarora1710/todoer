@@ -24,7 +24,7 @@ std::string Expression::to_string() const
         }
         result.push_back(')');
     }
-    return result;
+    return std::move(result);
 }
 
 bool Expression::is_assign() const
@@ -61,7 +61,7 @@ std::string Expression::get_assign_lhs() const
     if (op.operands[0].isAtom())
     {
         auto atom = std::get<Atom>(op.operands[0].value);
-        return atom.value;
+        return std::move(atom.value);
     }
     throw std::runtime_error("Expression is not an assignment");
 }
