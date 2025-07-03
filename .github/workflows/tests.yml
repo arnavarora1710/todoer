@@ -16,4 +16,5 @@ jobs:
     - name: Make and populate build directory
       run: mkdir -p build && cd build && cmake .. && make
     - name: Run tests
+      working-directory: ./build
       run: ./test_runner
