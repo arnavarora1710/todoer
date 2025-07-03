@@ -1,8 +1,6 @@
 #pragma once
 
 #include <stdexcept>
-#include <variant>
-#include <utility>
 #include <string>
 
 struct Token
