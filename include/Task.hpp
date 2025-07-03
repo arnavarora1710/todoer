@@ -43,8 +43,26 @@ public:
         // if we have a target expression, update it with the result
         if (m_target_expr)
         {
+            // Handle both int and double results
+            std::string result_str;
+            try
+            {
+                result_str = std::to_string(std::any_cast<int>(result));
+            }
+            catch (const std::bad_any_cast &)
+            {
+                try
+                {
+                    result_str = std::to_string(std::any_cast<double>(result));
+                }
+                catch (const std::bad_any_cast &)
+                {
+                    throw std::runtime_error("Unsupported result type in task execution");
+                }
+            }
+
             // Replace the target expression with an atom containing the result
-            m_target_expr->value = Expression::Atom{std::to_string(std::any_cast<int>(result))};
+            m_target_expr->value = Expression::Atom{result_str};
         }
 
         return result;

@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 #include <optional>
+#include <unordered_map>
+#include <variant>
 
 class Lexer
 {
@@ -18,7 +20,7 @@ public:
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
-    Expression parseExpression(int min_binding_power = 0);
+    Expression parseExpression(std::unordered_map<std::string, std::variant<int, double>> &variables, int min_binding_power = 0);
 };
 
-Expression from_string(std::string_view input);
+Expression from_string(std::string_view input, std::unordered_map<std::string, std::variant<int, double>> &variables);
