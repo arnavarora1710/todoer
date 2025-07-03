@@ -248,7 +248,7 @@ TEST_CASE("Performance Benchmarks")
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream str;
         str << std::fixed << std::setprecision(5) << "1000-term addition: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 << "s";
+            << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
         MESSAGE(str.str());
     }
 

@@ -33,7 +33,7 @@ namespace Interpreter
     {
         TaskGraph task_graph(*expr);
         Scheduler scheduler(task_graph);
-        return scheduler.schedule(*expr);
+        return scheduler.schedule();
     }
 
     std::string interpret(std::string_view input, VariableMap &variables)
@@ -51,8 +51,8 @@ namespace Interpreter
                 lhs.pop_back();
             try
             {
-                auto rhs = std::move(from_string(split[1], variables));
-                result = std::move(evaluate(rhs));
+                auto rhs = from_string(split[1], variables);
+                result = evaluate(rhs);
                 variables[lhs] = result;
             }
             catch (const std::exception &e)
@@ -64,8 +64,8 @@ namespace Interpreter
         {
             try
             {
-                auto expr = std::move(from_string(input, variables));
-                result = std::move(evaluate(expr));
+                auto expr = from_string(input, variables);
+                result = evaluate(expr);
             }
             catch (const std::exception &e)
             {

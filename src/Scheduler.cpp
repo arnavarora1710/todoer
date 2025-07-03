@@ -6,13 +6,14 @@
 #include <iostream>
 #include <any>
 
-std::variant<int, double> Scheduler::schedule(Expression &expr)
+std::variant<int, double> Scheduler::schedule()
 {
     auto &leaves = m_task_graph.m_leaves;
     std::any result;
     while (!leaves.empty())
     {
-        auto &leaf = leaves.front();
+        auto leaf = std::move(leaves.front());
+        leaves.pop_front();
         result = leaf.execute();
         auto targetExpr = leaf.getTargetExpr();
         auto par = targetExpr->getParent();
@@ -61,7 +62,6 @@ std::variant<int, double> Scheduler::schedule(Expression &expr)
                 leaves.push_back(Task(Task::s_id_counter++, std::move(taskOp), std::move(par)));
             }
         }
-        leaves.pop_front();
     }
     try
     {
