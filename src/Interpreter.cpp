@@ -29,14 +29,17 @@ std::vector<std::string> splitOnEqual(std::string_view input)
 
 namespace Interpreter
 {
-    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr)
+    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr, char mode)
     {
         TaskGraph task_graph(*expr);
         Scheduler scheduler(task_graph);
-        return scheduler.schedule();
+        if (mode == 's')
+            return scheduler.serialSchedule();
+        else
+            return scheduler.parallelSchedule();
     }
 
-    std::string interpret(std::string_view input, VariableMap &variables)
+    std::string interpret(std::string_view input, VariableMap &variables, char mode)
     {
         auto split = splitOnEqual(input);
         std::variant<int, double> result;
@@ -52,7 +55,7 @@ namespace Interpreter
             try
             {
                 auto rhs = from_string(split[1], variables);
-                result = evaluate(rhs);
+                result = evaluate(rhs, mode);
                 variables[lhs] = result;
             }
             catch (const std::exception &e)
@@ -65,7 +68,7 @@ namespace Interpreter
             try
             {
                 auto expr = from_string(input, variables);
-                result = evaluate(expr);
+                result = evaluate(expr, mode);
             }
             catch (const std::exception &e)
             {

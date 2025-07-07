@@ -11,6 +11,6 @@ typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;
 
 namespace Interpreter
 {
-    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr);
-    std::string interpret(std::string_view input, VariableMap &variables);
+    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr, char mode = 's');
+    std::string interpret(std::string_view input, VariableMap &variables, char mode = 's');
 };

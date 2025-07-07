@@ -8,6 +8,8 @@
 #include "Expression.hpp"
 #include <iostream>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 // this structure should store task metadata as well as
 // a pointer to the operation that the task will execute
@@ -24,6 +26,7 @@ private:
 
 public:
     inline static std::size_t s_id_counter = 0;
+    inline static std::mutex s_mutex{};
     explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation, std::shared_ptr<Expression> target_expr = std::make_shared<Expression>())
         : m_id{id}, m_operation{std::move(operation)}, m_target_expr{target_expr} {}
 
@@ -63,7 +66,10 @@ public:
             }
 
             // Replace the target expression with an atom containing the result
-            m_target_expr->value = Expression::Atom{result_str};
+            {
+                std::unique_lock<std::mutex> lock(s_mutex);
+                m_target_expr->value = Expression::Atom{result_str};
+            }
         }
 
         return result;
