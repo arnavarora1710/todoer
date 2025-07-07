@@ -88,7 +88,7 @@ namespace Helper
 // Want to be able to create a TaskGraph from an Expression
 struct TaskGraph
 {
-    // the "leaves" would be the index of the task in the graph
+    // the "leaves" are independent tasks we can evaluate safely (in parallel)
     // for example, we can safely evaluate a leaf (2, +, 3) or a leaf (2, -)
     std::deque<Task> m_leaves{};
 
