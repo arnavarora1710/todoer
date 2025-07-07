@@ -12,8 +12,8 @@ include_directories(include)
 
 file(GLOB_RECURSE ALL_SRC "src/*.cpp")
 
-set(MAIN_SRC "src/main.cpp")
-list(FILTER ALL_SRC EXCLUDE REGEX ".*main\\.cpp$")
+set(MAIN_SRC "src/Todoer.cpp")
+list(FILTER ALL_SRC EXCLUDE REGEX ".*Todoer\\.cpp$")
 set(CORE_SRC ${ALL_SRC})  # this is what test_runner will use
 
 # App executable
@@ -28,5 +28,5 @@ target_compile_options(test_runner PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS})
 target_link_options(test_runner PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS})
 
 enable_testing()
-add_test(NAME test_parser COMMAND test_runner)
-add_test(NAME test_interpreter COMMAND test_runner)
+add_test(NAME TestLexer COMMAND test_runner)
+add_test(NAME TestInterpreter COMMAND test_runner)
