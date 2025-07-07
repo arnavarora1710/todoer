@@ -1,7 +1,6 @@
 #include "Interpreter.hpp"
 #include "Lexer.hpp"
 #include "Expression.hpp"
-#include <cassert>
 #include <vector>
 #include <string>
 #include <variant>

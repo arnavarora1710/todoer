@@ -2,7 +2,6 @@
 #include <cctype>
 #include <stdexcept>
 #include <algorithm>
-#include <iostream>
 
 Lexer::Lexer(std::string_view input)
 {

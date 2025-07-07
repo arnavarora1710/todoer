@@ -4,7 +4,6 @@
 #include "Expression.hpp"
 #include <cassert>
 #include <variant>
-#include <iostream>
 #include <any>
 #include <vector>
 #include <future>

@@ -1,6 +1,4 @@
 #include "Expression.hpp"
-#include <iostream>
-#include <cassert>
 
 Expression::Expression(Atom atom) : value(atom) {}
 Expression::Expression(Operation operation) : value(operation) {}
