@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 
+
 void printUsage(std::string_view programName)
 {
     std::cerr << "Usage: " << programName << " [s|p]" << std::endl;
@@ -11,7 +12,7 @@ void printUsage(std::string_view programName)
 
 int main(int argc, char *argv[])
 {
-    char mode = 's';
+    Mode mode = Mode::Serial;
     if (argc > 1)
     {
         // if length of argv[1] is more than 1, return error
@@ -20,10 +21,14 @@ int main(int argc, char *argv[])
             printUsage(argv[0]);
             return 1;
         }
-        mode = argv[1][0];
+
         // if mode is not s or p, return error
         // mode can only be serial or parallel
-        if (mode != 's' && mode != 'p')
+        if (argv[1][0] == 's')
+            mode = Mode::Serial;
+        else if (argv[1][0] == 'p')
+            mode = Mode::Parallel;
+        else
         {
             printUsage(argv[0]);
             return 1;

@@ -30,17 +30,17 @@ std::vector<std::string> splitOnEqual(std::string_view input)
 
 namespace Interpreter
 {
-    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr, char mode)
+    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr, Mode mode)
     {
         TaskGraph task_graph(*expr);
         Scheduler scheduler(task_graph);
-        if (mode == 's')
+        if (mode == Mode::Serial)
             return scheduler.serialSchedule();
         else
             return scheduler.parallelSchedule();
     }
 
-    std::string interpret(std::string_view input, VariableMap &variables, char mode)
+    std::string interpret(std::string_view input, VariableMap &variables, Mode mode)
     {
         auto split = splitOnEqual(input);
         std::variant<int, double> result;

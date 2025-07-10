@@ -2,7 +2,6 @@
 
 #include "Token.hpp"
 #include "Expression.hpp"
-
 #include <string_view>
 #include <vector>
 #include <optional>
@@ -10,7 +9,7 @@
 #include <variant>
 #include <memory>
 
-typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;
+using VariableMap = std::unordered_map<std::string, std::variant<int, double>>;
 
 class Lexer
 {
@@ -23,7 +22,6 @@ public:
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
-    std::shared_ptr<Expression> parseExpression(VariableMap &variables, int min_binding_power = 0);
 };
 
 std::shared_ptr<Expression> from_string(std::string_view input, VariableMap &variables);

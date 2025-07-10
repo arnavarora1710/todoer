@@ -1,9 +1,10 @@
+#include "Interpreter.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "Lexer.hpp"
 #include "third_party/doctest.h"
 
-typedef std::unordered_map<std::string, std::variant<int, double>> VariableMap;
+using VariableMap = std::unordered_map<std::string, std::variant<int, double>>;
 
 TEST_CASE("Testing Basic Lexer and Parser")
 {
