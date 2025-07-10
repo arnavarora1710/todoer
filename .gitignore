@@ -1,3 +1,5 @@
 .DS_Store
 build/
 .vscode/
+.cache/
+compile_commands.json

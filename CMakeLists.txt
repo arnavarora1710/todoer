@@ -10,16 +10,16 @@ set(GCC_COVERAGE_COMPILE_FLAGS -g -O0 -Wall -Wextra -Wpedantic -fsanitize=addres
 
 include_directories(include)
 
-file(GLOB_RECURSE ALL_SRC "src/*.cpp")
+file(GLOB_RECURSE ALL_SRC CONFIGURE_DEPENDS "src/*.cpp")
 
 set(MAIN_SRC "src/Todoer.cpp")
 list(FILTER ALL_SRC EXCLUDE REGEX ".*Todoer\\.cpp$")
 set(CORE_SRC ${ALL_SRC})  # this is what test_runner will use
 
 # App executable
-add_executable(todoer ${CORE_SRC} ${MAIN_SRC})
-target_compile_options(todoer PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS})
-target_link_options(todoer PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS})
+add_executable(${PROJECT_NAME} ${CORE_SRC} ${MAIN_SRC})
+target_compile_options(${PROJECT_NAME} PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS})
+target_link_options(${PROJECT_NAME} PRIVATE ${GCC_COVERAGE_COMPILE_FLAGS})
 
 # Test executable
 file(GLOB_RECURSE TEST_SRC "tests/*.cpp")
