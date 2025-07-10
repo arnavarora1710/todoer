@@ -1,6 +1,8 @@
 #include "Interpreter.hpp"
 #include "Lexer.hpp"
 #include "Expression.hpp"
+#include "TaskGraph.hpp"
+#include "Scheduler.hpp"
 #include <vector>
 #include <string>
 #include <variant>
