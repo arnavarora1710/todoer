@@ -1,4 +1,5 @@
 #include "third_party/doctest.h"
+#include "third_party/calculator.hpp"
 #include "Interpreter.hpp"
 #include <chrono>
 #include <sstream>
@@ -205,8 +206,19 @@ TEST_CASE("Performance Benchmarks")
         std::stringstream strParallel;
         strParallel << std::fixed << std::setprecision(5) << "1000 small expressions (parallel): "
                     << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            calculator::eval("1 + 2 * 3");
+        }
+        end = std::chrono::high_resolution_clock::now();
+        std::stringstream strHeaderOnlyCalc;
+        strHeaderOnlyCalc << std::fixed << std::setprecision(5) << "1000 small expressions (header-only calculator): "
+                          << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
         MESSAGE(strSerial.str());
         MESSAGE(strParallel.str());
+        MESSAGE(strHeaderOnlyCalc.str());
     }
 
     SUBCASE("Medium Expression Benchmark")
@@ -231,8 +243,19 @@ TEST_CASE("Performance Benchmarks")
         std::stringstream strParallel;
         strParallel << std::fixed << std::setprecision(5) << "1000 medium expressions (parallel): "
                     << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            calculator::eval(medium_expr);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        std::stringstream strHeaderOnlyCalc;
+        strHeaderOnlyCalc << std::fixed << std::setprecision(5) << "1000 medium expressions (header-only calculator): "
+                          << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
         MESSAGE(strSerial.str());
         MESSAGE(strParallel.str());
+        MESSAGE(strHeaderOnlyCalc.str());
     }
 
     SUBCASE("Variable-Heavy Expression Benchmark")
@@ -289,8 +312,19 @@ TEST_CASE("Performance Benchmarks")
         std::stringstream strParallel;
         strParallel << std::fixed << std::setprecision(5) << "1000-term addition (parallel): "
                     << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            calculator::eval(big_input);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        std::stringstream strHeaderOnlyCalc;
+        strHeaderOnlyCalc << std::fixed << std::setprecision(5) << "1000-term addition (header-only calculator): "
+                          << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
         MESSAGE(strSerial.str());
         MESSAGE(strParallel.str());
+        MESSAGE(strHeaderOnlyCalc.str());
     }
 
     SUBCASE("Deep Parentheses Benchmark")
@@ -319,8 +353,19 @@ TEST_CASE("Performance Benchmarks")
         std::stringstream strParallel;
         strParallel << std::fixed << std::setprecision(5) << "Deep parentheses (100 levels) (parallel): "
                     << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 1000; i++)
+        {
+            calculator::eval(deep_expr);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        std::stringstream strHeaderOnlyCalc;
+        strHeaderOnlyCalc << std::fixed << std::setprecision(5) << "Deep parentheses (100 levels) (header-only calculator): "
+                          << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
         MESSAGE(strSerial.str());
         MESSAGE(strParallel.str());
+        MESSAGE(strHeaderOnlyCalc.str());
     }
 
     SUBCASE("Floating Point Heavy Benchmark")
