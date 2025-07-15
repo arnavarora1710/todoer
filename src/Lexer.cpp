@@ -3,7 +3,7 @@
 #include <cctype>
 #include <algorithm>
 
-Lexer::Lexer(std::string_view input)
+Lexer::Lexer(const std::string_view input)
 {
     for (auto token_iter = input.begin(); token_iter != input.end();)
     {
@@ -47,9 +47,9 @@ std::optional<Token> Lexer::peek() noexcept
     return tokens.back();
 }
 
-std::shared_ptr<Expression> from_string(std::string_view input, VariableMap &variables)
+std::shared_ptr<Expression> from_string(const std::string_view input, VariableMap &variables)
 {
-    Lexer lexer(input);
+    const Lexer lexer(input);
     Parser parser(lexer, variables);
     auto expr = parser.parseExpression(0);
     populateParentPointers(*expr);

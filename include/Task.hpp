@@ -1,6 +1,5 @@
 #pragma once
 
-#include <any>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -14,19 +13,16 @@
 
 // idea is to make multiple simple functions that can be executed
 // example: add, subtract, multiply, divide, etc.
-class Task
+struct Task
 {
-private:
     // needs the id of the task + operation to execute
     std::size_t m_id{};
     std::unique_ptr<Ops> m_operation{};
     std::shared_ptr<Expression> m_target_expr{}; // pointer to the expression node this task will modify
-
-public:
     inline static std::size_t s_id_counter = 0;
     inline static std::mutex s_mutex{};
 
-    explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation,
+    explicit Task(const std::size_t id, std::unique_ptr<Ops> &&operation,
                   std::shared_ptr<Expression> target_expr = std::make_shared<Expression>())
                   : m_id{id},
                     m_operation{std::move(operation)},
@@ -44,7 +40,7 @@ public:
         }
 
         // execute the function and get the result
-        auto result = m_operation->execute();
+        const auto result = m_operation->execute();
 
         // if we have a target expression, update it with the result
         if (m_target_expr)
@@ -69,7 +65,7 @@ public:
 
             // Replace the target expression with an atom containing the result
             {
-                std::unique_lock<std::mutex> lock(s_mutex);
+                std::unique_lock lock(s_mutex);
                 m_target_expr->value = Expression::Atom{result_str};
             }
         }

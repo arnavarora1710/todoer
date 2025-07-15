@@ -60,22 +60,22 @@ namespace Helper
         case '^':
             return make_binary_ops([](auto a, auto b)
                                    { return std::pow(a, b); }, value1, value2);
-        case '&':
+        case '&': {
             if (std::is_same_v<decltype(value1), int> && std::is_same_v<decltype(value2), int>)
                 return make_binary_ops([](auto a, auto b)
                                        { return a & b; },
                                        static_cast<int>(value1),
                                        static_cast<int>(value2));
-            else
-                throw std::runtime_error("Invalid operands for bitwise AND operator, both operands must be integers");
-        case '|':
+            throw std::runtime_error("Invalid operands for bitwise AND operator, both operands must be integers");
+        }
+        case '|': {
             if (std::is_same_v<decltype(value1), int> && std::is_same_v<decltype(value2), int>)
                 return make_binary_ops([](auto a, auto b)
                                        { return a | b; },
                                        static_cast<int>(value1),
                                        static_cast<int>(value2));
-            else
-                throw std::runtime_error("Invalid operands for bitwise OR operator, both operands must be integers");
+            throw std::runtime_error("Invalid operands for bitwise OR operator, both operands must be integers");
+        }
         default:
             throw std::runtime_error("Unknown binary operator: " + op);
         }

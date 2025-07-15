@@ -3,16 +3,16 @@
 #include <cstring>
 
 
-void printUsage(std::string_view programName)
+void printUsage(const std::string_view programName)
 {
     std::cerr << "Usage: " << programName << " [s|p]" << std::endl;
     std::cerr << "s: serial mode" << std::endl;
     std::cerr << "p: parallel mode" << std::endl;
 }
 
-int main(int argc, char *argv[])
+int main(const int argc, char *argv[])
 {
-    Mode mode = Mode::Serial;
+    auto mode = Mode::Serial;
     if (argc > 1)
     {
         // if the length of argv[1] is more than 1, return error

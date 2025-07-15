@@ -11,17 +11,15 @@
 
 using VariableMap = std::unordered_map<std::string, std::variant<int, double>>;
 
-class Lexer
+struct Lexer
 {
-private:
-    std::vector<Token> tokens;
-
-public:
     Lexer() = delete;
     explicit Lexer(std::string_view input);
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
+
+    std::vector<Token> tokens;
 };
 
 std::shared_ptr<Expression> from_string(std::string_view input, VariableMap &variables);

@@ -30,14 +30,13 @@ std::vector<std::string> splitOnEqual(std::string_view input)
 
 namespace Interpreter
 {
-    std::variant<int, double> evaluate(const std::shared_ptr<Expression> &expr, Mode mode)
+    value evaluate(const std::shared_ptr<Expression> &expr, const Mode mode)
     {
         TaskGraph task_graph(*expr);
-        Scheduler scheduler(task_graph);
+        const Scheduler scheduler(task_graph);
         if (mode == Mode::Serial)
             return scheduler.serialSchedule();
-        else
-            return scheduler.parallelSchedule();
+        return scheduler.parallelSchedule();
     }
 
     std::string interpret(std::string_view input, VariableMap &variables, Mode mode)
@@ -48,7 +47,7 @@ namespace Interpreter
         {
             return "Invalid input";
         }
-        else if (split.size() == 2)
+        if (split.size() == 2)
         {
             auto lhs = split[0];
             while (lhs.back() == ' ')
@@ -82,27 +81,24 @@ namespace Interpreter
         return "";
     }
 
-    std::variant<int, double> interpret_numeric(std::string_view input, VariableMap &variables, Mode mode)
+    value interpret_numeric(std::string_view input, VariableMap &variables, const Mode mode)
     {
         const auto split = splitOnEqual(input);
         if (split.size() > 2)
         {
             throw std::runtime_error("Invalid input");
         }
-        else if (split.size() == 2)
+        if (split.size() == 2)
         {
             auto lhs = split[0];
             while (lhs.back() == ' ')
                 lhs.pop_back();
-            auto rhs = from_string(split[1], variables);
-            std::variant<int, double> result = evaluate(rhs, mode);
+            const auto rhs = from_string(split[1], variables);
+            const value result = evaluate(rhs, mode);
             variables[lhs] = result;
             return result;
         }
-        else
-        {
-            auto expr = from_string(input, variables);
-            return evaluate(expr, mode);
-        }
+        const auto expr = from_string(input, variables);
+        return evaluate(expr, mode);
     }
 }

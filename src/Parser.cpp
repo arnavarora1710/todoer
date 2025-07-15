@@ -1,6 +1,6 @@
 #include "Parser.hpp"
 
-std::shared_ptr<Expression> Parser::parseExpression(int min_binding_power)
+std::shared_ptr<Expression> Parser::parseExpression(const int min_binding_power)
 {
     auto token = lexer.next();
     if (token->type == Token::Type::Atom ||

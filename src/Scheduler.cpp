@@ -3,7 +3,6 @@
 #include "Expression.hpp"
 #include <cassert>
 #include <variant>
-#include <any>
 #include <vector>
 #include <future>
 
@@ -19,9 +18,8 @@ std::variant<int, double> Scheduler::serialSchedule() const {
         auto leaf = std::move(leaves.front());
         leaves.pop_front();
         result = leaf.execute();
-        auto targetExpr = leaf.getTargetExpr();
-        auto par = targetExpr->getParent();
-        if (checkIfParentReady(par))
+        const auto targetExpr = leaf.getTargetExpr();
+        if (auto par = targetExpr->getParent(); checkIfParentReady(par))
         {
             auto &op = std::get<Expression::Operation>(par->value);
             leaves.push_back(createTask(op, par));
@@ -50,14 +48,13 @@ std::variant<int, double> Scheduler::parallelSchedule() const {
             auto targetExpr = leaf.getTargetExpr();
             futures.emplace_back(m_pool->enqueueTask(std::move(leaf)), std::move(targetExpr));
         }
-        for (auto &future : futures)
+        for (auto &[fst, snd] : futures)
         {
-            result = future.first.get();
+            result = fst.get();
         }
-        for (auto &future : futures)
+        for (auto &[fst, snd] : futures)
         {
-            auto par = future.second->getParent();
-            if (checkIfParentReady(par))
+            if (auto par = snd->getParent(); checkIfParentReady(par))
             {
                 auto &op = std::get<Expression::Operation>(par->value);
                 leaves.push_back(createTask(op, par));
@@ -80,9 +77,9 @@ bool Scheduler::checkIfParentReady(const std::shared_ptr<Expression> &par)
     {
         if (!par->isOperation())
             throw std::runtime_error("Parent is not an operation");
-        auto &op = std::get<Expression::Operation>(par->value);
+        auto &[op, operands] = std::get<Expression::Operation>(par->value);
         bool allAtoms = true;
-        for (auto &operand : op.operands)
+        for (const auto &operand : operands)
         {
             if (operand->isOperation())
             {
@@ -97,7 +94,7 @@ bool Scheduler::checkIfParentReady(const std::shared_ptr<Expression> &par)
 
 Task Scheduler::createTask(Expression::Operation &op, std::shared_ptr<Expression> &par)
 {
-    auto numOperands = op.operands.size();
+    const auto numOperands = op.operands.size();
 
     assert(numOperands == 1 || numOperands == 2);
     std::unique_ptr<Ops> taskOp;

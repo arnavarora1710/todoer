@@ -7,7 +7,6 @@
 #include <future>
 #include <queue>
 #include <memory>
-#include <any>
 #include "Task.hpp"
 
 // Wrapper class to connect Task execution with futures
@@ -22,7 +21,7 @@ struct TaskWrapper
     {
         try
         {
-            auto result = task.execute();
+            const auto result = task.execute();
             promise.set_value(result);
             return result;
         }
