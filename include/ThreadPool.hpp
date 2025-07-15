@@ -16,7 +16,7 @@ struct TaskWrapper
     Task task;
     std::promise<std::variant<int, double>> promise;
 
-    TaskWrapper(Task &&t) : task(std::move(t)) {}
+    explicit TaskWrapper(Task &&t) : task(std::move(t)) {}
 
     std::variant<int, double> execute()
     {

@@ -94,7 +94,7 @@ struct TaskGraph
 
     TaskGraph() = delete;
     // only need to construct from an expression
-    TaskGraph(Expression &expr);
+    explicit TaskGraph(Expression &expr);
     // disable copy and move constructors / assignment operators
     // because we don't want to copy/move the graph
     TaskGraph(const TaskGraph &) = delete;

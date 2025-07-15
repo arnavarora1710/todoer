@@ -7,8 +7,7 @@ Lexer::Lexer(std::string_view input)
 {
     for (auto token_iter = input.begin(); token_iter != input.end();)
     {
-        const auto token = *token_iter;
-        if (token == ' ' || token == '\n')
+        if (const auto token = *token_iter; token == ' ' || token == '\n')
         {
         }
         else if (std::isdigit(token) || std::isalpha(token))

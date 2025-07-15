@@ -16,12 +16,12 @@ std::vector<std::string> splitOnEqual(std::string_view input)
         auto equal_pos = input.find('=', pos);
         if (equal_pos != std::string_view::npos)
         {
-            result.push_back(std::string(input.substr(pos, equal_pos - pos)));
+            result.emplace_back(input.substr(pos, equal_pos - pos));
             pos = equal_pos + 1;
         }
         else
         {
-            result.push_back(std::string(input.substr(pos)));
+            result.emplace_back(input.substr(pos));
             break;
         }
     }
@@ -30,7 +30,7 @@ std::vector<std::string> splitOnEqual(std::string_view input)
 
 namespace Interpreter
 {
-    std::variant<int, double> evaluate(std::shared_ptr<Expression> &expr, Mode mode)
+    std::variant<int, double> evaluate(const std::shared_ptr<Expression> &expr, Mode mode)
     {
         TaskGraph task_graph(*expr);
         Scheduler scheduler(task_graph);
@@ -42,7 +42,7 @@ namespace Interpreter
 
     std::string interpret(std::string_view input, VariableMap &variables, Mode mode)
     {
-        auto split = splitOnEqual(input);
+        const auto split = splitOnEqual(input);
         std::variant<int, double> result;
         if (split.size() > 2)
         {
@@ -75,8 +75,8 @@ namespace Interpreter
             {
                 return e.what();
             }
-            return std::visit([&](auto result)
-                              { return std::to_string(result); },
+            return std::visit([&](auto answer)
+                              { return std::to_string(answer); },
                               result);
         }
         return "";
@@ -84,8 +84,7 @@ namespace Interpreter
 
     std::variant<int, double> interpret_numeric(std::string_view input, VariableMap &variables, Mode mode)
     {
-        auto split = splitOnEqual(input);
-        std::variant<int, double> result;
+        const auto split = splitOnEqual(input);
         if (split.size() > 2)
         {
             throw std::runtime_error("Invalid input");
@@ -96,7 +95,7 @@ namespace Interpreter
             while (lhs.back() == ' ')
                 lhs.pop_back();
             auto rhs = from_string(split[1], variables);
-            result = evaluate(rhs, mode);
+            std::variant<int, double> result = evaluate(rhs, mode);
             variables[lhs] = result;
             return result;
         }

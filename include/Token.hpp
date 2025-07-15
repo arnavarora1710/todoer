@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 #include <cassert>
+#include <utility>
 #include <variant>
 
 struct Token
@@ -17,7 +18,7 @@ struct Token
     std::string value;
 
     Token() = delete;
-    Token(Type type, std::string value) : type(type), value(value) {}
+    Token(Type type, std::string value) : type(type), value(std::move(value)) {}
 };
 
 inline std::pair<std::monostate, int> prefixBindingPower(const std::string &op)

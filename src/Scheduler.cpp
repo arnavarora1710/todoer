@@ -6,13 +6,11 @@
 #include <any>
 #include <vector>
 #include <future>
-#include <thread>
 
 // Define the static member variable
 std::unique_ptr<ThreadPool> Scheduler::m_pool = nullptr;
 
-std::variant<int, double> Scheduler::serialSchedule()
-{
+std::variant<int, double> Scheduler::serialSchedule() const {
     auto &leaves = m_task_graph.m_leaves;
     std::variant<int, double> result{0};
 
@@ -39,8 +37,7 @@ std::variant<int, double> Scheduler::serialSchedule()
     }
 }
 
-std::variant<int, double> Scheduler::parallelSchedule()
-{
+std::variant<int, double> Scheduler::parallelSchedule() const {
     auto &leaves = m_task_graph.m_leaves;
     std::variant<int, double> result{0};
     while (!leaves.empty())
@@ -51,7 +48,7 @@ std::variant<int, double> Scheduler::parallelSchedule()
             auto leaf = std::move(leaves.front());
             leaves.pop_front();
             auto targetExpr = leaf.getTargetExpr();
-            futures.push_back(std::make_pair(m_pool->enqueueTask(std::move(leaf)), std::move(targetExpr)));
+            futures.emplace_back(m_pool->enqueueTask(std::move(leaf)), std::move(targetExpr));
         }
         for (auto &future : futures)
         {
@@ -77,7 +74,7 @@ std::variant<int, double> Scheduler::parallelSchedule()
     }
 }
 
-bool Scheduler::checkIfParentReady(std::shared_ptr<Expression> &par)
+bool Scheduler::checkIfParentReady(const std::shared_ptr<Expression> &par)
 {
     if (par)
     {
@@ -109,9 +106,9 @@ Task Scheduler::createTask(Expression::Operation &op, std::shared_ptr<Expression
         // unary operation
         auto value = Helper::extractAtomValue(*op.operands[0]);
         taskOp = std::visit(
-            [&](auto value)
+            [&](auto value_param)
             {
-                return Helper::createUnaryOp(op.op, value);
+                return Helper::createUnaryOp(op.op, value_param);
             },
             value);
     }
@@ -121,9 +118,9 @@ Task Scheduler::createTask(Expression::Operation &op, std::shared_ptr<Expression
         auto value1 = Helper::extractAtomValue(*op.operands[0]);
         auto value2 = Helper::extractAtomValue(*op.operands[1]);
         taskOp = std::visit(
-            [&](auto value1, auto value2)
+            [&](auto value1_param, auto value2_param)
             {
-                return Helper::createBinaryOp(op.op, value1, value2);
+                return Helper::createBinaryOp(op.op, value1_param, value2_param);
             },
             value1, value2);
     }

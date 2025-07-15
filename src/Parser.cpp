@@ -17,9 +17,9 @@ std::shared_ptr<Expression> Parser::parseExpression(int min_binding_power)
             }
             else
             {
-                // has to be a prefix op (unary + or -)
+                // has to be prefix op (unary + or -)
                 auto [_, rbp] = prefixBindingPower(token->value);
-                std::shared_ptr<Expression> rhs = parseExpression(rbp);
+                const std::shared_ptr<Expression> rhs = parseExpression(rbp);
                 std::vector<std::shared_ptr<Expression>> operands;
                 operands.push_back(rhs);
                 lhs = std::make_shared<Expression>(Expression::Operation{token->value, operands});
@@ -27,7 +27,7 @@ std::shared_ptr<Expression> Parser::parseExpression(int min_binding_power)
         }
         else
         {
-            if (variables.find(token->value) != variables.end())
+            if (variables.contains(token->value))
             {
                 lhs = std::make_shared<Expression>(Expression::Atom{
                     std::visit([](auto v)

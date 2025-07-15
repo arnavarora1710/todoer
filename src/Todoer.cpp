@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     Mode mode = Mode::Serial;
     if (argc > 1)
     {
-        // if length of argv[1] is more than 1, return error
+        // if the length of argv[1] is more than 1, return error
         if (strlen(argv[1]) > 1)
         {
             printUsage(argv[0]);

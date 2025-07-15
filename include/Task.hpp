@@ -7,6 +7,7 @@
 #include "ops/Ops.hpp"
 #include "Expression.hpp"
 #include <mutex>
+#include <utility>
 
 // this structure should store task metadata as well as
 // a pointer to the operation that the task will execute
@@ -24,14 +25,18 @@ private:
 public:
     inline static std::size_t s_id_counter = 0;
     inline static std::mutex s_mutex{};
-    explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation, std::shared_ptr<Expression> target_expr = std::make_shared<Expression>())
-        : m_id{id}, m_operation{std::move(operation)}, m_target_expr{target_expr} {}
 
-    std::size_t getId() const { return m_id; }
+    explicit Task(std::size_t id, std::unique_ptr<Ops> &&operation,
+                  std::shared_ptr<Expression> target_expr = std::make_shared<Expression>())
+                  : m_id{id},
+                    m_operation{std::move(operation)},
+                    m_target_expr{std::move(target_expr)} {}
+
+    [[nodiscard]] std::size_t getId() const { return m_id; }
     std::unique_ptr<Ops> &getOperation() { return m_operation; }
     std::shared_ptr<Expression> &getTargetExpr() { return m_target_expr; }
 
-    std::variant<int, double> execute() const
+    [[nodiscard]] std::variant<int, double> execute() const
     {
         if (!m_operation)
         {

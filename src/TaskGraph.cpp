@@ -15,7 +15,7 @@ namespace Helper
             else
                 return std::stoi(atom_value);
         }
-        catch (const std::exception &e)
+        catch ([[maybe_unused]] const std::exception &e)
         {
             throw std::runtime_error("An error occurred while parsing the atom value: " + atom_value +
                                      "\nPress Ctrl+C or type 'exit' to exit the program");
@@ -40,9 +40,9 @@ std::deque<Task> getLeaves(Expression &expr)
         // No task required - this will only happen if the expression is a single atom
         auto value = Helper::extractAtomValue(expr);
         auto taskOp = std::visit(
-            [&](auto value)
+            [&](auto value_param)
             {
-                return Helper::createNoOp(value);
+                return Helper::createNoOp(value_param);
             },
             value);
         std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
@@ -64,9 +64,9 @@ std::deque<Task> getLeaves(Expression &expr)
         {
             auto value = Helper::extractAtomValue(*operand);
             auto taskOp = std::visit(
-                [&](auto value)
+                [&](auto value_param)
                 {
-                    return Helper::createUnaryOp(op.op, value);
+                    return Helper::createUnaryOp(op.op, value_param);
                 },
                 value);
             std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
@@ -91,9 +91,9 @@ std::deque<Task> getLeaves(Expression &expr)
             auto value1 = Helper::extractAtomValue(*operand1);
             auto value2 = Helper::extractAtomValue(*operand2);
             auto taskOp = std::visit(
-                [&](auto value1, auto value2)
+                [&](auto value1_param, auto value2_param)
                 {
-                    return Helper::createBinaryOp(op.op, value1, value2);
+                    return Helper::createBinaryOp(op.op, value1_param, value2_param);
                 },
                 value1,
                 value2);

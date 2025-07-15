@@ -25,7 +25,7 @@ std::string Expression::to_string() const
     return result;
 }
 
-void populateParentPointers(Expression &expr, std::shared_ptr<Expression> parent)
+void populateParentPointers(Expression &expr, const std::shared_ptr<Expression> &parent)
 {
     expr.parent = parent;
     if (expr.isOperation())

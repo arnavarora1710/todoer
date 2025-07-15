@@ -18,7 +18,7 @@ private:
 
 public:
     Lexer() = delete;
-    Lexer(std::string_view input);
+    explicit Lexer(std::string_view input);
 
     std::optional<Token> next() noexcept;
     std::optional<Token> peek() noexcept;
