@@ -190,7 +190,7 @@ TEST_CASE("Performance Benchmarks")
         auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 1000; i++)
         {
-            Interpreter::interpret("1 + 2 * 3", variables, Mode::Serial);
+            Interpreter::interpret_numeric("1 + 2 * 3", variables, Mode::Serial);
         }
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream strSerial;
@@ -200,7 +200,7 @@ TEST_CASE("Performance Benchmarks")
         start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 1000; i++)
         {
-            Interpreter::interpret("1 + 2 * 3", variables, Mode::Parallel);
+            Interpreter::interpret_numeric("1 + 2 * 3", variables, Mode::Parallel);
         }
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strParallel;
@@ -225,33 +225,33 @@ TEST_CASE("Performance Benchmarks")
     {
         std::string medium_expr = "1 + 2 * 3 - 4 / 2 + 5 * (6 - 7) + 8";
         auto start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 10000; i++)
         {
-            Interpreter::interpret(medium_expr, variables, Mode::Serial);
+            Interpreter::interpret_numeric(medium_expr, variables, Mode::Serial);
         }
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream strSerial;
-        strSerial << std::fixed << std::setprecision(5) << "1000 medium expressions (serial): "
+        strSerial << std::fixed << std::setprecision(5) << "10000 medium expressions (serial): "
                   << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
 
         start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 10000; i++)
         {
-            Interpreter::interpret(medium_expr, variables, Mode::Parallel);
+            Interpreter::interpret_numeric(medium_expr, variables, Mode::Parallel);
         }
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strParallel;
-        strParallel << std::fixed << std::setprecision(5) << "1000 medium expressions (parallel): "
+        strParallel << std::fixed << std::setprecision(5) << "10000 medium expressions (parallel): "
                     << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
 
         start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 10000; i++)
         {
             calculator::eval(medium_expr);
         }
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strHeaderOnlyCalc;
-        strHeaderOnlyCalc << std::fixed << std::setprecision(5) << "1000 medium expressions (header-only calculator): "
+        strHeaderOnlyCalc << std::fixed << std::setprecision(5) << "10000 medium expressions (header-only calculator): "
                           << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
         MESSAGE(strSerial.str());
         MESSAGE(strParallel.str());
@@ -270,7 +270,7 @@ TEST_CASE("Performance Benchmarks")
         auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 1000; i++)
         {
-            Interpreter::interpret("a + b * c - d / e + f", variables, Mode::Serial);
+            Interpreter::interpret_numeric("a + b * c - d / e + f", variables, Mode::Serial);
         }
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream strSerial;
@@ -280,7 +280,7 @@ TEST_CASE("Performance Benchmarks")
         start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 1000; i++)
         {
-            Interpreter::interpret("a + b * c - d / e + f", variables, Mode::Parallel);
+            Interpreter::interpret_numeric("a + b * c - d / e + f", variables, Mode::Parallel);
         }
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strParallel;
@@ -300,14 +300,14 @@ TEST_CASE("Performance Benchmarks")
         big_input += "1";
 
         auto start = std::chrono::high_resolution_clock::now();
-        Interpreter::interpret(big_input, variables, Mode::Serial);
+        Interpreter::interpret_numeric(big_input, variables, Mode::Serial);
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream strSerial;
         strSerial << std::fixed << std::setprecision(5) << "1000-term addition (serial): "
                   << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
 
         start = std::chrono::high_resolution_clock::now();
-        Interpreter::interpret(big_input, variables, Mode::Parallel);
+        Interpreter::interpret_numeric(big_input, variables, Mode::Parallel);
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strParallel;
         strParallel << std::fixed << std::setprecision(5) << "1000-term addition (parallel): "
@@ -341,14 +341,14 @@ TEST_CASE("Performance Benchmarks")
         }
 
         auto start = std::chrono::high_resolution_clock::now();
-        Interpreter::interpret(deep_expr, variables, Mode::Serial);
+        Interpreter::interpret_numeric(deep_expr, variables, Mode::Serial);
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream strSerial;
         strSerial << std::fixed << std::setprecision(5) << "Deep parentheses (100 levels) (serial): "
                   << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms";
 
         start = std::chrono::high_resolution_clock::now();
-        Interpreter::interpret(deep_expr, variables, Mode::Parallel);
+        Interpreter::interpret_numeric(deep_expr, variables, Mode::Parallel);
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strParallel;
         strParallel << std::fixed << std::setprecision(5) << "Deep parentheses (100 levels) (parallel): "
@@ -373,7 +373,7 @@ TEST_CASE("Performance Benchmarks")
         auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 1000; i++)
         {
-            Interpreter::interpret("3.14159 * 2.71828 + 1.41421 / 1.73205", variables, Mode::Serial);
+            Interpreter::interpret_numeric("3.14159 * 2.71828 + 1.41421 / 1.73205", variables, Mode::Serial);
         }
         auto end = std::chrono::high_resolution_clock::now();
         std::stringstream strSerial;
@@ -383,7 +383,7 @@ TEST_CASE("Performance Benchmarks")
         start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < 1000; i++)
         {
-            Interpreter::interpret("3.14159 * 2.71828 + 1.41421 / 1.73205", variables, Mode::Parallel);
+            Interpreter::interpret_numeric("3.14159 * 2.71828 + 1.41421 / 1.73205", variables, Mode::Parallel);
         }
         end = std::chrono::high_resolution_clock::now();
         std::stringstream strParallel;

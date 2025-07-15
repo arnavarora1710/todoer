@@ -81,4 +81,29 @@ namespace Interpreter
         }
         return "";
     }
+
+    std::variant<int, double> interpret_numeric(std::string_view input, VariableMap &variables, Mode mode)
+    {
+        auto split = splitOnEqual(input);
+        std::variant<int, double> result;
+        if (split.size() > 2)
+        {
+            throw std::runtime_error("Invalid input");
+        }
+        else if (split.size() == 2)
+        {
+            auto lhs = split[0];
+            while (lhs.back() == ' ')
+                lhs.pop_back();
+            auto rhs = from_string(split[1], variables);
+            result = evaluate(rhs, mode);
+            variables[lhs] = result;
+            return result;
+        }
+        else
+        {
+            auto expr = from_string(input, variables);
+            return evaluate(expr, mode);
+        }
+    }
 }
