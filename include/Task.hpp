@@ -31,7 +31,7 @@ public:
     std::unique_ptr<Ops> &getOperation() { return m_operation; }
     std::shared_ptr<Expression> &getTargetExpr() { return m_target_expr; }
 
-    std::any execute() const
+    std::variant<int, double> execute() const
     {
         if (!m_operation)
         {
@@ -39,7 +39,7 @@ public:
         }
 
         // execute the function and get the result
-        std::any result = m_operation->execute();
+        auto result = m_operation->execute();
 
         // if we have a target expression, update it with the result
         if (m_target_expr)
@@ -48,15 +48,15 @@ public:
             std::string result_str;
             try
             {
-                result_str = std::to_string(std::any_cast<int>(result));
+                result_str = std::to_string(std::get<int>(result));
             }
-            catch (const std::bad_any_cast &)
+            catch (const std::bad_variant_access &)
             {
                 try
                 {
-                    result_str = std::to_string(std::any_cast<double>(result));
+                    result_str = std::to_string(std::get<double>(result));
                 }
-                catch (const std::bad_any_cast &)
+                catch (const std::bad_variant_access &)
                 {
                     throw std::runtime_error("Unsupported result type in task execution");
                 }

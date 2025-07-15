@@ -14,15 +14,15 @@
 struct TaskWrapper
 {
     Task task;
-    std::promise<std::any> promise;
+    std::promise<std::variant<int, double>> promise;
 
     TaskWrapper(Task &&t) : task(std::move(t)) {}
 
-    std::any execute()
+    std::variant<int, double> execute()
     {
         try
         {
-            std::any result = task.execute();
+            auto result = task.execute();
             promise.set_value(result);
             return result;
         }
@@ -33,7 +33,7 @@ struct TaskWrapper
         }
     }
 
-    std::future<std::any> get_future()
+    std::future<std::variant<int, double>> get_future()
     {
         return promise.get_future();
     }
@@ -53,7 +53,7 @@ public:
     }
 
     // Enqueue a Task object and return a future for its result
-    std::future<std::any> enqueueTask(Task &&task)
+    std::future<std::variant<int, double>> enqueueTask(Task &&task)
     {
         auto wrapper = std::make_shared<TaskWrapper>(std::move(task));
         auto future = wrapper->get_future();

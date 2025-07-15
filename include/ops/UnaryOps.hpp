@@ -10,6 +10,7 @@ concept UnaryTDefaultConstructible = std::is_default_constructible_v<T>;
 
 template <typename T, typename UnaryFunc>
     requires UnaryFuncInvocable<T, UnaryFunc>
+             && ArithmeticType<T>
 class UnaryOps
     : public Ops
 {
@@ -26,7 +27,7 @@ public:
     UnaryOps(UnaryFunc func, T argument) : m_func(func), arg(argument) {}
 
     // execute the operation
-    std::any execute() const override
+    std::variant<int, double> execute() const override
     {
         return m_func(arg);
     }

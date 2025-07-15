@@ -1,6 +1,5 @@
 #include "Scheduler.hpp"
 #include "TaskGraph.hpp"
-#include "ThreadPool.hpp"
 #include "Expression.hpp"
 #include <cassert>
 #include <variant>
@@ -9,10 +8,13 @@
 #include <future>
 #include <thread>
 
+// Define the static member variable
+std::unique_ptr<ThreadPool> Scheduler::m_pool = nullptr;
+
 std::variant<int, double> Scheduler::serialSchedule()
 {
     auto &leaves = m_task_graph.m_leaves;
-    std::any result;
+    std::variant<int, double> result{0};
 
     while (!leaves.empty())
     {
@@ -29,28 +31,27 @@ std::variant<int, double> Scheduler::serialSchedule()
     }
     try
     {
-        return std::any_cast<int>(result);
+        return std::get<int>(result);
     }
-    catch (const std::bad_any_cast &)
+    catch (const std::bad_variant_access &)
     {
-        return std::any_cast<double>(result);
+        return std::get<double>(result);
     }
 }
 
 std::variant<int, double> Scheduler::parallelSchedule()
 {
-    ThreadPool pool(std::thread::hardware_concurrency());
     auto &leaves = m_task_graph.m_leaves;
-    std::any result;
+    std::variant<int, double> result{0};
     while (!leaves.empty())
     {
-        std::vector<std::pair<std::future<std::any>, std::shared_ptr<Expression>>> futures;
+        std::vector<std::pair<std::future<std::variant<int, double>>, std::shared_ptr<Expression>>> futures;
         while (!leaves.empty())
         {
             auto leaf = std::move(leaves.front());
             leaves.pop_front();
             auto targetExpr = leaf.getTargetExpr();
-            futures.push_back(std::make_pair(pool.enqueueTask(std::move(leaf)), std::move(targetExpr)));
+            futures.push_back(std::make_pair(m_pool->enqueueTask(std::move(leaf)), std::move(targetExpr)));
         }
         for (auto &future : futures)
         {
@@ -68,11 +69,11 @@ std::variant<int, double> Scheduler::parallelSchedule()
     }
     try
     {
-        return std::any_cast<int>(result);
+        return std::get<int>(result);
     }
-    catch (const std::bad_any_cast &)
+    catch (const std::bad_variant_access &)
     {
-        return std::any_cast<double>(result);
+        return std::get<double>(result);
     }
 }
 

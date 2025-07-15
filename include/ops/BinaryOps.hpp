@@ -5,13 +5,17 @@
 
 template <typename T, typename U, typename BinaryFunc>
 concept BinaryFuncInvocable = std::is_invocable_v<BinaryFunc, T, U>;
+
 template <typename T>
 concept BinaryTDefaultConstructible = std::is_default_constructible_v<T>;
+
 template <typename U>
 concept BinaryUDefaultConstructible = std::is_default_constructible_v<U>;
 
 template <typename T, typename U, typename BinaryFunc>
     requires BinaryFuncInvocable<T, U, BinaryFunc>
+             && ArithmeticType<T> 
+             && ArithmeticType<U>
 class BinaryOps
     : public Ops
 {
@@ -31,7 +35,7 @@ public:
         : m_func(func), arg1(argument1), arg2(argument2) {}
 
     // execute the operation
-    std::any execute() const override
+    std::variant<int, double> execute() const override
     {
         return m_func(arg1, arg2);
     }
