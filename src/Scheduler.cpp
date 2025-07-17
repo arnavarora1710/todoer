@@ -31,51 +31,44 @@ std::variant<int, double> Scheduler::serialSchedule() const {
 std::variant<int, double> Scheduler::parallelSchedule() const {
     auto &leaves = m_task_graph.m_leaves;
     std::variant<int, double> result{0};
-    while (!leaves.empty())
-    {
-        std::vector<std::pair<std::future<std::variant<int, double>>, std::shared_ptr<Expression>>> futures;
-        while (!leaves.empty())
-        {
+
+    std::vector<std::pair<std::future<std::variant<int, double>>, std::shared_ptr<Expression>>> futures;
+    while (!leaves.empty()) {
+        futures.reserve(leaves.size());
+
+        // Schedule all tasks in this round
+        while (!leaves.empty()) {
             auto leaf = std::move(leaves.front());
             leaves.pop_front();
             auto targetExpr = leaf.getTargetExpr();
             futures.emplace_back(m_pool->enqueueTask(std::move(leaf)), std::move(targetExpr));
         }
-        for (auto &[fst, snd] : futures)
-        {
-            result = fst.get();
-        }
-        for (auto &[fst, snd] : futures)
-        {
-            if (auto par = snd->getParent(); checkIfParentReady(par))
-            {
+
+        // Wait for all tasks and process results
+        while (!futures.empty()) {
+            auto [future, targetExpr] = std::move(futures.back());
+            futures.pop_back();
+            result = future.get();
+            if (auto par = targetExpr->getParent(); checkIfParentReady(par)) {
                 auto &op = std::get<Expression::Operation>(par->value);
                 leaves.push_back(createTask(op, par));
             }
         }
     }
+
     return result;
 }
 
 bool Scheduler::checkIfParentReady(const std::shared_ptr<Expression> &par)
 {
-    if (par)
-    {
-        if (!par->isOperation())
-            throw std::runtime_error("Parent is not an operation");
-        auto &[op, operands] = std::get<Expression::Operation>(par->value);
-        bool allAtoms = true;
-        for (const auto &operand : operands)
-        {
-            if (operand->isOperation())
-            {
-                allAtoms = false;
-                break;
-            }
-        }
-        return allAtoms;
-    }
-    return false;
+    if (!par)
+        return false;
+    if (!par->isOperation())
+        throw std::runtime_error("Parent is not an operation");
+
+    const auto &[op, operands] = std::get<Expression::Operation>(par->value);
+    return std::none_of(operands.begin(), operands.end(),
+                        [](const auto &operand) { return operand->isOperation(); });
 }
 
 Task Scheduler::createTask(Expression::Operation &op, std::shared_ptr<Expression> &par)

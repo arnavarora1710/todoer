@@ -58,9 +58,10 @@ public:
         auto future = wrapper->get_future();
 
         {
-            std::lock_guard<std::mutex> lock(m_mtx);
+            std::lock_guard lock(m_mtx);
             m_tasks.emplace(wrapper);
         }
+
         m_cv.notify_one();
         return future;
     }
@@ -72,7 +73,7 @@ private:
     std::condition_variable m_cv;
     bool m_stop = false;
 
-    void startThreadPool(std::size_t num_threads)
+    void startThreadPool(const std::size_t num_threads)
     {
         m_threads.reserve(num_threads);
         for (auto i = 0u; i < num_threads; ++i)
@@ -83,7 +84,7 @@ private:
                 {
                     std::shared_ptr<TaskWrapper> task_wrapper;
                     {
-                        std::unique_lock<std::mutex> lock(m_mtx);
+                        std::unique_lock lock(m_mtx);
                         m_cv.wait(lock, [this]
                                   { return m_stop || !m_tasks.empty(); });
 
@@ -103,7 +104,7 @@ private:
     stopThreadPool() noexcept
     {
         {
-            std::unique_lock<std::mutex> lock(m_mtx);
+            std::unique_lock lock(m_mtx);
             m_stop = true;
         }
         m_cv.notify_all();
