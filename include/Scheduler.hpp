@@ -11,7 +11,8 @@ struct Scheduler
 {
     TaskGraph &m_task_graph;
     static std::unique_ptr<ThreadPool> m_pool;
-    const std::size_t num_threads = std::thread::hardware_concurrency();
+    // std::thread::hardware_concurrency() takes too much runtime
+    const std::size_t num_threads = 8;
 
     explicit Scheduler(TaskGraph &task_graph) : m_task_graph(task_graph) {
         if (!m_pool)

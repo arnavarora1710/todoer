@@ -25,14 +25,7 @@ std::variant<int, double> Scheduler::serialSchedule() const {
             leaves.push_back(createTask(op, par));
         }
     }
-    try
-    {
-        return std::get<int>(result);
-    }
-    catch (const std::bad_variant_access &)
-    {
-        return std::get<double>(result);
-    }
+    return result;
 }
 
 std::variant<int, double> Scheduler::parallelSchedule() const {
@@ -61,14 +54,7 @@ std::variant<int, double> Scheduler::parallelSchedule() const {
             }
         }
     }
-    try
-    {
-        return std::get<int>(result);
-    }
-    catch (const std::bad_variant_access &)
-    {
-        return std::get<double>(result);
-    }
+    return result;
 }
 
 bool Scheduler::checkIfParentReady(const std::shared_ptr<Expression> &par)

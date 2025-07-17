@@ -46,24 +46,12 @@ struct Task
         if (m_target_expr)
         {
             // Handle both int and double results
-            std::string result_str;
-            try
-            {
-                result_str = std::to_string(std::get<int>(result));
-            }
-            catch (const std::bad_variant_access &)
-            {
-                try
-                {
-                    result_str = std::to_string(std::get<double>(result));
-                }
-                catch (const std::bad_variant_access &)
-                {
-                    throw std::runtime_error("Unsupported result type in task execution");
-                }
-            }
 
             // Replace the target expression with an atom containing the result
+            const std::string result_str = std::visit([] (auto&& value) {
+                return std::to_string(value);
+            }, result);
+
             {
                 std::unique_lock lock(s_mutex);
                 m_target_expr->value = Expression::Atom{result_str};

@@ -20,9 +20,7 @@ std::shared_ptr<Expression> Parser::parseExpression(const int min_binding_power)
                 // has to be prefix op (unary + or -)
                 auto [_, rbp] = prefixBindingPower(token->value);
                 const std::shared_ptr<Expression> rhs = parseExpression(rbp);
-                std::vector<std::shared_ptr<Expression>> operands;
-                operands.push_back(rhs);
-                lhs = std::make_shared<Expression>(Expression::Operation{token->value, operands});
+                lhs = std::make_shared<Expression>(Expression::Operation{token->value, {rhs}});
             }
         }
         else
@@ -61,10 +59,9 @@ std::shared_ptr<Expression> Parser::parseExpression(const int min_binding_power)
                 else
                     lexer.next(); // consume op
                 auto rhs = parseExpression(rbp);
-                std::vector<std::shared_ptr<Expression>> operands;
-                operands.push_back(lhs);
-                operands.push_back(rhs);
-                lhs = std::make_shared<Expression>(Expression::Operation{next_token->value, operands});
+                lhs = std::make_shared<Expression>(Expression::Operation{
+                                            next_token->value,
+                                       {lhs, rhs}});
             }
             else
             {
