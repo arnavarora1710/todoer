@@ -21,20 +21,10 @@ namespace Helper
                                      "\nPress Ctrl+C or type 'exit' to exit the program");
         }
     }
-
-    // Helper function to append leaves from one deque to another
-    void appendLeaves(std::deque<Task> &target, std::deque<Task> &&source)
-    {
-        target.insert(target.end(),
-                      std::make_move_iterator(source.begin()),
-                      std::make_move_iterator(source.end()));
-    }
 }
 
-std::deque<Task> getLeaves(Expression &expr)
+void getLeaves(Expression &expr, std::deque<Task>& leaves)
 {
-    std::deque<Task> leaves;
-
     if (expr.isAtom())
     {
         // No task required - this will only happen if the expression is a single atom
@@ -48,7 +38,7 @@ std::deque<Task> getLeaves(Expression &expr)
         std::shared_ptr<Expression> expr_ptr(&expr, [](Expression *) {});
         Task task(Task::s_id_counter++, std::move(taskOp), expr_ptr);
         leaves.push_back(std::move(task));
-        return leaves;
+        return;
     }
 
     // Handle operation expression
@@ -76,7 +66,7 @@ std::deque<Task> getLeaves(Expression &expr)
         else
         {
             // Recursively get leaves from operand
-            Helper::appendLeaves(leaves, getLeaves(*operand));
+            getLeaves(*operand, leaves);
         }
     }
     else
@@ -106,19 +96,17 @@ std::deque<Task> getLeaves(Expression &expr)
             // Handle mixed operand types
             if (operand1->isOperation())
             {
-                Helper::appendLeaves(leaves, getLeaves(*operand1));
+                getLeaves(*operand1, leaves);
             }
             if (operand2->isOperation())
             {
-                Helper::appendLeaves(leaves, getLeaves(*operand2));
+                getLeaves(*operand2, leaves);
             }
         }
     }
-
-    return leaves;
 }
 
 TaskGraph::TaskGraph(Expression &expr)
 {
-    m_leaves = getLeaves(expr);
+    getLeaves(expr, m_leaves);
 }

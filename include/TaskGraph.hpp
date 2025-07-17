@@ -80,9 +80,6 @@ namespace Helper
             throw std::runtime_error("Unknown binary operator: " + op);
         }
     }
-
-    // Helper function to append leaves from one deque to another
-    void appendLeaves(std::deque<Task> &target, std::deque<Task> &&source);
 }
 
 // Want to be able to create a TaskGraph from an Expression
@@ -105,4 +102,4 @@ struct TaskGraph
     ~TaskGraph() = default;
 };
 
-std::deque<Task> getLeaves(Expression &expr);
+void getLeaves(Expression &expr, std::deque<Task> &leaves);
