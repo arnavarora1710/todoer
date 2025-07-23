@@ -5,43 +5,16 @@
 #include <mutex>
 #include <condition_variable>
 #include <future>
-#include <queue>
 #include <memory>
+#include <atomic>
+#include <deque>
 #include "Task.hpp"
-
-// Wrapper class to connect Task execution with futures
-struct TaskWrapper
-{
-    Task task;
-    std::promise<std::variant<int, double>> promise;
-
-    explicit TaskWrapper(Task &&t) : task(std::move(t)) {}
-
-    std::variant<int, double> execute()
-    {
-        try
-        {
-            const auto result = task.execute();
-            promise.set_value(result);
-            return result;
-        }
-        catch (...)
-        {
-            promise.set_exception(std::current_exception());
-            throw;
-        }
-    }
-
-    std::future<std::variant<int, double>> get_future()
-    {
-        return promise.get_future();
-    }
-};
 
 class ThreadPool
 {
 public:
-    explicit ThreadPool(std::size_t num_threads)
+    explicit ThreadPool(std::size_t num_threads = std::thread::hardware_concurrency())
+        : m_stop(false)
     {
         startThreadPool(num_threads);
     }
@@ -52,67 +25,86 @@ public:
     }
 
     // Enqueue a Task object and return a future for its result
-    std::future<std::variant<int, double>> enqueueTask(Task &&task)
+    std::future<std::variant<int, double>> enqueueTask(Task&& task)
     {
-        auto wrapper = std::make_shared<TaskWrapper>(std::move(task));
-        auto future = wrapper->get_future();
+        auto task_ptr = std::make_shared<std::packaged_task<std::variant<int, double>()>>(
+            [task = std::move(task)]() mutable {
+                return task.execute();
+            }
+        );
+
+        auto wrapper_func = [task_ptr]() {
+            (*task_ptr)();
+        };
 
         {
             std::lock_guard lock(m_mtx);
-            m_tasks.emplace(wrapper);
+            m_tasks.emplace_back(wrapper_func);
         }
-
         m_cv.notify_one();
-        return future;
+
+        return task_ptr->get_future();
     }
 
 private:
+    class ThreadWorker {
+    public:
+        explicit ThreadWorker(ThreadPool* pool) : m_pool { pool } {}
+
+        void operator()() const
+        {
+            std::function<void()> task;
+            
+            while (true) {
+                {
+                    std::unique_lock lock(m_pool->m_mtx);
+                    
+                    m_pool->m_cv.wait(lock, [this] {
+                        return m_pool->m_stop || !m_pool->m_tasks.empty();
+                    });
+                    
+                    if (m_pool->m_stop && m_pool->m_tasks.empty()) {
+                        break;
+                    }
+                    
+                    if (!m_pool->m_tasks.empty()) {
+                        task = std::move(m_pool->m_tasks.front());
+                        m_pool->m_tasks.pop_front();
+                    }
+                }
+
+                task();
+            }
+        }
+        
+    private:
+        ThreadPool* m_pool;
+    };
+
     std::vector<std::thread> m_threads{};
-    std::queue<std::shared_ptr<TaskWrapper>> m_tasks{};
-    std::mutex m_mtx;
+    mutable std::mutex m_mtx;
     std::condition_variable m_cv;
-    bool m_stop = false;
+    std::atomic<bool> m_stop;
+    std::deque<std::function<void()>> m_tasks{};
 
     void startThreadPool(const std::size_t num_threads)
     {
         m_threads.reserve(num_threads);
-        for (auto i = 0u; i < num_threads; ++i)
-        {
-            m_threads.emplace_back([this]
-                                   {
-                while (true)
-                {
-                    std::shared_ptr<TaskWrapper> task_wrapper;
-                    {
-                        std::unique_lock lock(m_mtx);
-                        m_cv.wait(lock, [this]
-                                  { return m_stop || !m_tasks.empty(); });
-
-                        if (m_stop && m_tasks.empty())
-                        {
-                            break;
-                        }
-                        task_wrapper = m_tasks.front();
-                        m_tasks.pop();
-                    }
-                    task_wrapper->execute();
-                } });
+        for (std::size_t i = 0; i < num_threads; ++i) {
+            m_threads.emplace_back(ThreadWorker(this));
         }
     }
 
-    void
-    stopThreadPool() noexcept
+    void stopThreadPool() noexcept
     {
         {
-            std::unique_lock lock(m_mtx);
+            std::lock_guard lock(m_mtx);
             m_stop = true;
         }
         m_cv.notify_all();
 
-        for (auto &thread : m_threads)
-        {
-            if (thread.joinable())
-            {
+        for (auto& thread : m_threads) {
+            if (thread.joinable()) {
                 thread.join();
             }
         }
